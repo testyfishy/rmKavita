@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T05:48:25</updated>
+  <id>root</id>
+  <title>Kavita</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>onDeck</id>
+    <title>On Deck</title>
+    <content type="text">Browse On Deck</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/on-deck" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>recentlyUpdated</id>
+    <title>Recently Updated</title>
+    <content type="text">Browse Recently Updated</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/recently-updated" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>recentlyAdded</id>
+    <title>Recently Added</title>
+    <content type="text">Browse Recently Added</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/recently-added" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>readingList</id>
+    <title>Reading Lists</title>
+    <content type="text">Browse by Reading Lists</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/reading-list" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>wantToRead</id>
+    <title>Want to Read</title>
+    <content type="text">Browse Want to Read</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/want-to-read" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>allLibraries</id>
+    <title>All Libraries</title>
+    <content type="text">Browse by Libraries</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/libraries" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:25</updated>
+    <id>allCollections</id>
+    <title>All Collections</title>
+    <content type="text">Browse by Collections</content>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/collections" />
+  </entry>
+</feed>

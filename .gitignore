@@ -1,0 +1,15 @@
+# build output
+/package/rmkavita
+/dist/
+# local installer settings
+/install/install.conf
+# logs, editor and OS files
+*.log
+*.swp
+*~
+.DS_Store
+Thumbs.db
+# go test and profiling output
+*.test
+*.out
+*.prof

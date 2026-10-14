@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T10:44:53</updated>
+  <id>libraries</id>
+  <title>All Libraries</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="/api/opds/TESTKEY/libraries" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+  <entry>
+    <updated>2026-10-12T10:44:53</updated>
+    <id>1</id>
+    <title>Manga A</title>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/libraries/1" />
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/library-cover?libraryId=1&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/library-cover?libraryId=1&amp;apiKey=TESTKEY" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T10:44:53</updated>
+    <id>2</id>
+    <title>Manga B</title>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/libraries/2" />
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/library-cover?libraryId=2&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/library-cover?libraryId=2&amp;apiKey=TESTKEY" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T10:44:53</updated>
+    <id>3</id>
+    <title>Books</title>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/libraries/3" />
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/library-cover?libraryId=3&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/library-cover?libraryId=3&amp;apiKey=TESTKEY" />
+  </entry>
+</feed>

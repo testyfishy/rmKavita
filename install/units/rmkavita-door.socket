@@ -1,0 +1,10 @@
+[Unit]
+Description=rmKavita local door (@DOOR_LISTEN@ -> @KAVITA_HOST@:@KAVITA_PORT@ through Tailscale)
+
+[Socket]
+ListenStream=@DOOR_LISTEN@
+Accept=yes
+MaxConnections=16
+
+[Install]
+WantedBy=sockets.target

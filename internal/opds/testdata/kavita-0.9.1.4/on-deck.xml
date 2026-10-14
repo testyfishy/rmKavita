@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T05:49:25</updated>
+  <id>on-deck</id>
+  <title>On Deck</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <totalResults xmlns="http://a9.com/-/spec/opensearch/1.1/">0</totalResults>
+  <itemsPerPage xmlns="http://a9.com/-/spec/opensearch/1.1/">20</itemsPerPage>
+  <startIndex xmlns="http://a9.com/-/spec/opensearch/1.1/">1</startIndex>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="/api/opds/TESTKEY/on-deck?pageNumber=1" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+</feed>

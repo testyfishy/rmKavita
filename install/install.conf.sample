@@ -1,0 +1,48 @@
+# rmKavita installer configuration. Copy to install.conf (git-ignored) and edit.
+# One KEY=VALUE per line; lines starting with # are comments (no comments after a value). Nothing in this file is
+# executed: it is read line by line and every value is checked before it is used.
+# Never put a Kavita password or API key here: you type those on the app's own Sign-in screen on the tablet.
+
+# --- the tablet (reMarkable Paper Pro) --------
+# Host name or IP address of the tablet as your computer reaches it (USB 10.11.99.1, Wi-Fi, VPN ...).
+TABLET_HOST=10.11.99.1
+TABLET_USER=root
+SSH_PORT=22
+# Private key for the tablet (the matching public key must be in the tablet's authorized_keys).
+# Empty = let ssh choose (agent, ~/.ssh/config).
+SSH_KEY=
+# ssh StrictHostKeyChecking value. "accept-new" needs OpenSSH 7.6+; older clients: "ask" and connect once by hand.
+SSH_STRICT=accept-new
+# Extra ssh options, plain words only (no spaces inside a word), e.g. -o ServerAliveInterval=30
+SSH_EXTRA=
+
+# --- where things go --------
+# AppLoad's app folder for rmKavita. The last path component must be rmkavita (uninstall removes this folder).
+APP_DIR=/home/root/xovi/exthome/appload/rmkavita
+# Folder with the package: rmkavita (static linux/arm64 binary), external.manifest.json, icon.png,
+# rmkavita.conf.sample. Empty = ../package relative to this installer.
+PACKAGE_DIR=
+# Scratch folder on the tablet for the upload (removed at the end).
+STAGE_DIR=/home/root/rmkavita-stage
+
+# --- the optional local "door" --------
+# DOOR=no : the app talks to your Kavita server directly. Set KAVITA_HOST/KAVITA_PORT and the app's Sign-in
+#           screen starts with http://KAVITA_HOST:KAVITA_PORT.
+# DOOR=yes: install a systemd socket on DOOR_LISTEN that forwards to KAVITA_HOST:KAVITA_PORT with
+#           `tailscale nc` (for a Kavita server that is only reachable through Tailscale). The Sign-in screen
+#           starts with http://DOOR_LISTEN. Needs Tailscale on the tablet and a writable root file system
+#           for a moment (see ROOTFS_RW_CMD).
+DOOR=no
+KAVITA_HOST=
+KAVITA_PORT=5000
+DOOR_LISTEN=127.0.0.1:5001
+
+# --- only used when DOOR=yes --------
+# The standard device layout: Vellum installs its helper commands in /home/root/.vellum/bin. If you set the
+# tablet up differently, point these at your own tailscale binary / remount helpers. Leave ROOTFS_RW_CMD and
+# ROOTFS_RO_CMD empty (or pointing at a missing file) to use plain `mount -o remount,rw /` and `ro`.
+TAILSCALE_BIN=/home/root/.vellum/bin/tailscale
+ROOTFS_RW_CMD=/home/root/.vellum/bin/mount-rw
+ROOTFS_RO_CMD=/home/root/.vellum/bin/mount-restore
+# Optional: if /etc/dropbear is a bind mount on your device and the remount drops it, bind this directory back.
+SSH_BIND_SRC=

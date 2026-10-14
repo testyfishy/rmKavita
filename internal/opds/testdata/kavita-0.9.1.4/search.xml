@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OpenSearchDescription xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Search</ShortName>
+  <Description>Search for Series, Collections, or Reading Lists</Description>
+  <Url type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="results" template="/api/opds/TESTKEY/series?query={searchTerms}" />
+  <Tags />
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Developer>kavitareader.com</Developer>
+</OpenSearchDescription>

@@ -1,0 +1,8 @@
+{
+  "name": "rmKavita",
+  "application": "rmkavita",
+  "environment": {
+    "RMKAVITA_LOG": "/tmp/rmkavita.log"
+  },
+  "qtfb": true
+}

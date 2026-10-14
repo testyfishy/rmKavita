@@ -1,0 +1,135 @@
+# rmKavita configuration  (/home/root/.config/rmkavita.conf, mode 600)
+#
+# Sign in on the device: the app writes `server`, `username` and `api_key` here
+# itself. The password is never stored. Lines starting with # are ignored.
+# Fit, refresh intervals, direction, colour, footer and DPI are
+# chosen in the app's Settings screen and live in rmkavita-settings.json, not here.
+# The keys below are the display A/B kit and the memory budget. Settings ->
+# Advanced shows most of them; a change made there is written to this file.
+
+# The Kavita server the Sign-in screen starts with.
+server = http://127.0.0.1:5000
+
+# --- pages in memory ---
+
+# Fitted pages are kept in RAM only (nothing is written to disk). Read ahead:
+# pages fetched in advance of the one you are on (0-5). Keep behind: pages kept
+# behind it for going back (0-4). cache_mb is the byte budget of all held pages
+# (32-192); when it, or the memory guard below, says so, far-ahead pages go
+# first, then the farthest ones behind. The page on screen is never dropped.
+read_ahead = 3
+keep_behind = 2
+cache_mb = 96
+
+# Memory guard (MB of MemAvailable). Below mem_guard_mb the read-ahead shrinks to
+# one page; below mem_floor_mb no new page is decoded at all (the page shows an
+# error with Retry instead of risking the out-of-memory killer, which would take
+# the tablet's own app down). 0 switches a limit off.
+mem_guard_mb = 200
+mem_floor_mb = 100
+
+# --- display A/B kit ---
+
+# E-ink waveform of a page turn: auto | fast | ui | content | animate.
+# auto = UI (it keeps colour and was the fastest in our tests).
+# animate is there to be tried (qtfb mode 2, the fastest-settling waveform in
+# xochitl; not verified on every firmware: if a page looks wrong, go back).
+page_mode = auto
+
+# Waveform of lists, settings and the sign-in screen: ui | fast | content.
+ui_mode = ui
+
+# Waveform used to clear the screen (every N pages, and by a corner hold).
+clear_mode = content
+
+# How the clearing refresh is done. AppLoad sleeps one second after every mode
+# message and every full-refresh request, so this matters:
+#   ui_full      = one update with a full-refresh request, in the waveform that
+#                  is already set: one second of waiting
+#   content_full = switch to the clear waveform, full refresh, switch back:
+#                  three seconds of waiting
+clear_style = ui_full
+
+# A clearing refresh that falls due at a page turn waits until the reader has
+# paused for this many milliseconds (a new touch cancels the wait; it happens
+# inside the turn at twice the interval). 0 = inside the turn.
+clear_idle_ms = 600
+
+# Framebuffer pixel format. auto = RGBA8888 (true greys; falls back to RGB565 by
+# itself when the system does not offer it). rgba | rgb565 force one. Applies at
+# the next launch. If greys look tinted, try rgb565.
+fb_format = auto
+
+# The strip around a page that does not fill the screen: white | match.
+# match = the colour of the page's own edge (black pages without a white frame).
+border = match
+
+# Margins: trim | keep (trim removes empty page margins, at most 10 % per side).
+crop = trim
+
+# Resampling filter: auto | catmull | lanczos | smooth.
+# auto = Catmull-Rom for comics, Lanczos3 for PDFs. smooth never rings but is a little softer.
+kernel = auto
+
+# How the bars and menus are repainted over the page: never | auto | always.
+#   never  = two updates (the top bar, the bottom bar) in the page waveform:
+#            the fastest, and enough on this panel
+#   auto   = adds a step: when the page under the bars is not white, a white
+#            update of their rectangles first, in the page waveform
+#   always = adds the same step in the CONTENT waveform (two mode messages:
+#            two seconds of waiting)
+# (The top bar is painted from the very top of the screen. The older key
+# chrome_clean = yes|no is still read: yes = auto, no = never.)
+bars_clean = never
+
+# --- render: how a page turn is drawn ---
+
+# quality  = CONTENT turns, every grey, colour when it is on (slowest, best)
+# balanced = the page_mode above (UI by default)
+# speed    = turns in the page_mode waveform, pages shown in grey (also colour
+#            ones) and reduced to speed_levels grey levels (white and black
+#            points clipped, footer and border on the levels) while they are
+#            prepared, so the turn itself costs no pixel work; no colour layer.
+#            Speed is black and white: the Colour setting is greyed out and
+#            left as it is, so it comes back when Speed is left.
+#            Settings -> Render has the same choice.
+render = balanced
+
+# Grey levels of a page in speed mode: 2 | 4 | 16, and how the reduction is
+# dithered: diffuse (error diffusion) | ordered (4x4 Bayer) | none (plain look-up).
+# Error diffusion keeps screentone; the ordered mask beats against it.
+speed_levels = 2
+speed_dither = diffuse
+
+# Tap columns: the left and right column turn pages, the middle one (this many
+# percent of the width, 20-60) opens and closes the bars.
+zone_middle_pct = 40
+
+# Hot corners: what holding a screen corner for hold_ms does. One of:
+#   none quit clear home settings controls first last next_chapter prev_chapter
+#   colour direction fit footer
+# (Settings -> Hot corners sets the same keys. Exit is always in the account menu.)
+hot_tl = none
+hot_tr = clear
+hot_bl = quit
+hot_br = none
+
+# Fetch the first page of the next chapter shortly before the end of this one.
+warmup = yes
+
+# --- everything else ---
+
+# Cover thumbnails in lists (small, RAM only).
+covers = yes
+
+# Rotate landscape double-page spreads to use the tall screen (off: the spread is shown whole).
+rotate_spreads = no
+
+# Page brightness curve (1 = off; below 1 lightens midtones, above 1 darkens them; 0.4 - 2.5).
+gamma = 1
+
+# Hold time of the corner gestures in milliseconds.
+hold_ms = 900
+
+# After a pause the page you are on is reported to Kavita again, so its progress matches (read-ahead moves it ahead).
+sync_progress = yes

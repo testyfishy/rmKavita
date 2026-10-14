@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T05:49:24</updated>
+  <id>library-Manga B</id>
+  <title>Manga B</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <totalResults xmlns="http://a9.com/-/spec/opensearch/1.1/">3</totalResults>
+  <itemsPerPage xmlns="http://a9.com/-/spec/opensearch/1.1/">20</itemsPerPage>
+  <startIndex xmlns="http://a9.com/-/spec/opensearch/1.1/">1</startIndex>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="/api/opds/TESTKEY/libraries/2?pageNumber=1" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+  <entry>
+    <updated>2026-10-12T05:49:24</updated>
+    <id>4</id>
+    <title>Delta Mixed</title>
+    <summary>Format: Archive</summary>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/series/4" />
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/series-cover?seriesId=4&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/series-cover?seriesId=4&amp;apiKey=TESTKEY" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:49:24</updated>
+    <id>5</id>
+    <title>Epsilon Webp</title>
+    <summary>Format: Archive</summary>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/series/5" />
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/series-cover?seriesId=5&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/series-cover?seriesId=5&amp;apiKey=TESTKEY" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:49:24</updated>
+    <id>3</id>
+    <title>Gamma Png</title>
+    <summary>Format: Archive</summary>
+    <link rel="subsection" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY/series/3" />
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/series-cover?seriesId=3&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/series-cover?seriesId=3&amp;apiKey=TESTKEY" />
+  </entry>
+</feed>

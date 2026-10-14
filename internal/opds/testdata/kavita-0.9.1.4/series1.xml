@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T05:48:34</updated>
+  <id>series-1</id>
+  <title>Alpha Blade - Storyline</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="/api/opds/TESTKEY/series/1" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+  <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/series-cover?seriesId=1&amp;apiKey=TESTKEY" />
+  <entry>
+    <updated>2026-10-12T05:48:35</updated>
+    <id>1</id>
+    <title>⭘ Alpha Blade - Volume 1</title>
+    <summary>File Type: x-cbz - 3.18 MB</summary>
+    <extent xmlns="http://purl.org/dc/terms/">3.18 MB</extent>
+    <format xmlns="http://purl.org/dc/terms/format">Archive</format>
+    <content type="text">application/x-cbz</content>
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/chapter-cover?chapterId=1&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/chapter-cover?chapterId=1&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-cbz" href="/api/opds/TESTKEY/series/1/volume/1/chapter/1/download/Alpha%20Blade%20v01.cbz" title="Alpha%20Blade%20v01.cbz" p5:count="12" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+    <link rel="http://vaemendis.net/opds-pse/stream" type="image/jpeg" href="/api/opds/TESTKEY/image?libraryId=1&amp;seriesId=1&amp;volumeId=1&amp;chapterId=1&amp;pageNumber={pageNumber}" p5:count="12" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:35</updated>
+    <id>2</id>
+    <title>⭘ Alpha Blade - Volume 2</title>
+    <summary>File Type: x-cbz - 2.83 MB</summary>
+    <extent xmlns="http://purl.org/dc/terms/">2.83 MB</extent>
+    <format xmlns="http://purl.org/dc/terms/format">Archive</format>
+    <content type="text">application/x-cbz</content>
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/chapter-cover?chapterId=2&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/chapter-cover?chapterId=2&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-cbz" href="/api/opds/TESTKEY/series/1/volume/2/chapter/2/download/Alpha%20Blade%20v02.cbz" title="Alpha%20Blade%20v02.cbz" p5:count="12" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+    <link rel="http://vaemendis.net/opds-pse/stream" type="image/jpeg" href="/api/opds/TESTKEY/image?libraryId=1&amp;seriesId=1&amp;volumeId=2&amp;chapterId=2&amp;pageNumber={pageNumber}" p5:count="12" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+  </entry>
+  <entry>
+    <updated>2026-10-12T05:48:35</updated>
+    <id>3</id>
+    <title>⭘ Alpha Blade - Volume 3</title>
+    <summary>File Type: x-cbz - 3.82 MB</summary>
+    <extent xmlns="http://purl.org/dc/terms/">3.82 MB</extent>
+    <format xmlns="http://purl.org/dc/terms/format">Archive</format>
+    <content type="text">application/x-cbz</content>
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/chapter-cover?chapterId=3&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/chapter-cover?chapterId=3&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-cbz" href="/api/opds/TESTKEY/series/1/volume/3/chapter/3/download/Alpha%20Blade%20v03.cbz" title="Alpha%20Blade%20v03.cbz" p5:count="12" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+    <link rel="http://vaemendis.net/opds-pse/stream" type="image/jpeg" href="/api/opds/TESTKEY/image?libraryId=1&amp;seriesId=1&amp;volumeId=3&amp;chapterId=3&amp;pageNumber={pageNumber}" p5:count="12" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+  </entry>
+</feed>

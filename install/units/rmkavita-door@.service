@@ -1,0 +1,12 @@
+[Unit]
+Description=One forwarded connection for the rmKavita door
+After=tailscaled.service
+
+[Service]
+ExecStart=@TAILSCALE_BIN@ nc @KAVITA_HOST@ @KAVITA_PORT@
+StandardInput=socket
+StandardOutput=socket
+StandardError=journal
+Nice=10
+MemoryMax=96M
+RuntimeMaxSec=3600

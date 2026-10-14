@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T10:44:54</updated>
+  <id>series-7</id>
+  <title>Sample PDF - Storyline</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="/api/opds/TESTKEY/series/7" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+  <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/series-cover?seriesId=7&amp;apiKey=TESTKEY" />
+  <entry>
+    <updated>2026-10-12T10:44:54</updated>
+    <id>12</id>
+    <title>⭘ Sample PDF - Sample PDF</title>
+    <summary>File Type: pdf - 9.49 KB</summary>
+    <extent xmlns="http://purl.org/dc/terms/">9.49 KB</extent>
+    <format xmlns="http://purl.org/dc/terms/format">Pdf</format>
+    <content type="text">application/pdf</content>
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/chapter-cover?chapterId=12&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/chapter-cover?chapterId=12&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/pdf" href="/api/opds/TESTKEY/series/7/volume/12/chapter/12/download/Sample%20PDF.pdf" title="Sample%20PDF.pdf" p5:count="5" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+    <link rel="http://vaemendis.net/opds-pse/stream" type="image/jpeg" href="/api/opds/TESTKEY/image?libraryId=3&amp;seriesId=7&amp;volumeId=12&amp;chapterId=12&amp;pageNumber={pageNumber}" p5:count="5" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+  </entry>
+</feed>

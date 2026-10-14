@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2005/Atom">
+  <updated>2026-10-12T05:49:25</updated>
+  <id>series-4</id>
+  <title>Delta Mixed - Storyline</title>
+  <icon>/api/opds/TESTKEY/favicon</icon>
+  <author>
+    <name>Kavita</name>
+    <uri>https://www.kavitareader.com</uri>
+  </author>
+  <link rel="self" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="/api/opds/TESTKEY/series/4" />
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="/api/opds/TESTKEY" />
+  <link rel="search" type="application/opensearchdescription+xml" href="/api/opds/TESTKEY/search" />
+  <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/series-cover?seriesId=4&amp;apiKey=TESTKEY" />
+  <entry>
+    <updated>2026-10-12T05:49:25</updated>
+    <id>9</id>
+    <title>⭘ Delta Mixed - Volume 1</title>
+    <summary>File Type: x-cbz - 2.04 MB</summary>
+    <extent xmlns="http://purl.org/dc/terms/">2.04 MB</extent>
+    <format xmlns="http://purl.org/dc/terms/format">Archive</format>
+    <content type="text">application/x-cbz</content>
+    <link rel="http://opds-spec.org/image" type="image/jpeg" href="/api/image/chapter-cover?chapterId=9&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="/api/image/chapter-cover?chapterId=9&amp;apiKey=TESTKEY" />
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-cbz" href="/api/opds/TESTKEY/series/4/volume/9/chapter/9/download/Delta%20Mixed%20v01.cbz" title="Delta%20Mixed%20v01.cbz" p5:count="7" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+    <link rel="http://vaemendis.net/opds-pse/stream" type="image/jpeg" href="/api/opds/TESTKEY/image?libraryId=2&amp;seriesId=4&amp;volumeId=9&amp;chapterId=9&amp;pageNumber={pageNumber}" p5:count="7" xmlns:p5="http://vaemendis.net/opds-pse/ns" />
+  </entry>
+</feed>
