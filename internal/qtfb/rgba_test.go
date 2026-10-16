@@ -295,7 +295,7 @@ func TestFormatOrder(t *testing.T) {
 }
 
 // With RMK_RENDER_DIR set, the RGBA framebuffer is written out as a PNG so the
-// path can be looked at on the HTPC: a 16-step grey ramp, the same ramp through
+// path can be looked at on a PC: a 16-step grey ramp, the same ramp through
 // the colour layer. Every pixel must be neutral (R = G = B) and opaque.
 func TestRenderRGBAFramebuffer(t *testing.T) {
 	m := Model{Name: "t", W: 320, H: 120, FBType: 3, RGBAType: 2}

@@ -1,8 +1,11 @@
 // Package qtfb speaks the qtfb framebuffer protocol that rm-appload exposes to
-// AppLoad apps (github.com/asivery/qtfb). The layout below is taken from
-// KOReader's ffi/qtfb_h.lua and was confirmed on the device with
-// ffi.sizeof/offsetof: ClientMessage is 24 bytes (union at 4), ServerMessage
-// is 32 bytes (union at 8, because of its size_t).
+// AppLoad apps (github.com/asivery/rm-appload, GPL-3.0; the protocol's own
+// header is backends/qtfb-clients/cpp/common.h). Message numbers and field
+// offsets are interface facts, re-implemented here in Go; no AppLoad code is
+// included. The layout was first read from KOReader's FFI declaration of the
+// same protocol and confirmed on the device with ffi.sizeof/offsetof:
+// ClientMessage is 24 bytes (union at 4), ServerMessage is 32 bytes (union at
+// 8, because of its size_t).
 package qtfb
 
 import (

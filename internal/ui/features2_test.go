@@ -203,7 +203,7 @@ func TestBarsAndMenuAreOpaque(t *testing.T) {
 	h.stop()
 }
 
-// rc3: over a dark page the bars are painted in the page waveform (after a white
+// Over a dark page the bars are painted in the page waveform (after a white
 // pre-fill) too: a CONTENT repaint is a mode message and a second of the panel
 // server sleeping, twice; only bars_clean = always still does it.
 func TestBarsOverADarkPageStayInThePageWaveform(t *testing.T) {

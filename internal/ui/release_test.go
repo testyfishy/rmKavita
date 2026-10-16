@@ -34,7 +34,7 @@ func (r *rig) openMangaB(row string) {
 // With the defaults, opening the bars is exactly two updates (the top bar, the
 // bottom bar) and closing them is two, and no refresh-mode message goes out
 // either way: on a white page, a black page, a colour page, and in every
-// render mode. The brief's number: rc3 sent four to open them.
+// render mode. Earlier builds sent four to open them.
 func TestBarsOpenAndCloseAreTwoUpdatesAndNoModeMessage(t *testing.T) {
 	cases := []struct {
 		name   string
@@ -324,7 +324,7 @@ func TestVersion030Defaults(t *testing.T) {
 		d.SpeedLevels != 2 || d.SpeedDither != "diffuse" || d.PageMode != "auto" {
 		t.Errorf("defaults: %+v", d)
 	}
-	// the rc2 key still maps: yes -> auto (the white pre-fill is an opt-in step)
+	// the key of earlier versions still maps: yes -> auto (the white pre-fill is an opt-in step)
 	if got := store.ParseConfig("chrome_clean = yes\n").BarsClean; got != "auto" {
 		t.Errorf("chrome_clean = yes -> %q", got)
 	}

@@ -1,0 +1,53 @@
+name: Bug report
+description: Something does not work, or looks wrong on the panel
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please check the [troubleshooting list](https://github.com/testyfishy/rmKavita/blob/main/docs/USER-GUIDE.md#troubleshooting) first.
+        **Never paste a Kavita password, API / OPDS key or server address.** The app's log never contains them, but check before you paste.
+  - type: input
+    id: version
+    attributes:
+      label: rmKavita version
+      description: Settings -> About
+      placeholder: "0.3.1"
+    validations:
+      required: true
+  - type: input
+    id: tablet
+    attributes:
+      label: Tablet and software version
+      placeholder: "Paper Pro, software 3.28"
+    validations:
+      required: true
+  - type: input
+    id: appload
+    attributes:
+      label: AppLoad / xovi version
+      description: If you do not know, say so.
+    validations:
+      required: false
+  - type: input
+    id: kavita
+    attributes:
+      label: Kavita server version
+      placeholder: "0.9.1.4"
+    validations:
+      required: false
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: What you tapped, what the screen did. For display problems say which Render setting and page mode you use.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: The last lines of the log
+      description: "`/tmp/rmkavita.log` on the tablet (about 20 lines around the problem)."
+      render: text
+    validations:
+      required: false

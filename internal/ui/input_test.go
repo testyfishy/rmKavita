@@ -9,7 +9,7 @@ import (
 	"rmkavita/internal/store"
 )
 
-// Input robustness: the first panel session of rc1 ended with an app that was
+// Input robustness: an early build once ended a session with an app that was
 // alive and idle but answered no touch. The tracker must be unable to get into
 // a state where the next touch is ignored, whatever the events were.
 

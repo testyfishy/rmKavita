@@ -130,7 +130,7 @@ func (a *App) runHot(act, how string) {
 	case store.HotColour:
 		if a.speedMode() {
 			// Speed is black and white: the Colour setting is left as it is, so
-			// that it is still the owner's choice when Speed is left
+			// that it is still the user's choice when Speed is left
 			a.logf("hot corner: colour is off in Speed mode (setting unchanged)")
 			return
 		}

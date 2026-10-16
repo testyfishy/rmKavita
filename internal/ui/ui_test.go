@@ -200,8 +200,8 @@ func startOpts(t *testing.T, o hopts) *harness {
 	}
 	cfg := store.DefaultConfig()
 	cfg.Covers = false
-	// the sequence tests below were written for the clearing refresh of rc2 (a mode
-	// flip inside the turn); the defaults of rc3 (ui_full, deferred to a pause)
+	// the sequence tests below were written for the older clearing refresh (a mode
+	// flip inside the turn); the current defaults (ui_full, deferred to a pause)
 	// are exercised by their own tests, which set them in mut
 	cfg.ClearStyle, cfg.ClearIdleMS = "content_full", 0
 	if o.mut != nil {

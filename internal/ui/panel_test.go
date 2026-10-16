@@ -431,8 +431,8 @@ func TestWaveformEconomyWithRMAppLoadTiming(t *testing.T) {
 	_ = mark
 }
 
-// page_mode = auto is UI for black-and-white and colour pages alike (the owner's
-// panel preference), so a chapter that mixes the two never flips the waveform;
+// page_mode = auto is UI for black-and-white and colour pages alike (the
+// maintainer's panel preference), so a chapter that mixes the two never flips the waveform;
 // a fixed page_mode is exactly that mode.
 func TestAutoPageModeIsUIAndFixedModesNeverMove(t *testing.T) {
 	a := &App{Cfg: store.DefaultConfig()}

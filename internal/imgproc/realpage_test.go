@@ -28,7 +28,7 @@ func pct(v []float64, p float64) float64 {
 }
 
 // TestRealSizePages times decode and fit of pages at the real size of the
-// owner's comics (2560 x 3936 and the 3975 x 3057 spread), black and white and
+// typical comics (2560 x 3936 and a 3975 x 3057 spread), black and white and
 // colour, over several runs, and compares the three kernels on a screentone
 // page. It only runs with RMK_BENCH=1; with RMK_RENDER_DIR it also writes a crop
 // of each kernel's output:

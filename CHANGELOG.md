@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+Documentation and credits only; the program is the same as 0.3.1 apart from comments.
+
+- The README is shorter; settings, hot corners, files and troubleshooting moved into
+  [docs/USER-GUIDE.md](docs/USER-GUIDE.md).
+- [CREDITS.md](CREDITS.md) now names every project that was read for ideas, with its licence and what it taught, and
+  says plainly that no code was copied.
+- The comment on the qtfb message layout now cites AppLoad's protocol header instead of KOReader's FFI declaration.
+- Issue form, pull-request checklist and a link to private vulnerability reporting.
+
 ## 0.3.1
 
 Long libraries.

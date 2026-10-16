@@ -102,7 +102,7 @@ func TestABChapterRealSizeBytes(t *testing.T) {
 		t.Skip("real-size pages")
 	}
 	fonts, _ := gfx.NewFonts()
-	// one real-size page: bytes within the range the owner's comics have (1.5 - 3 MB)
+	// one real-size page: bytes within the range real comic pages have (1.5 - 3 MB)
 	o := DefaultAB
 	g := gfx.NewCanvas(o.W, o.H)
 	halftone(g, image.Rect(0, 0, o.W, o.H), 0.4, 9)

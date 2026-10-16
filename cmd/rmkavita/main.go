@@ -107,7 +107,7 @@ func main() {
 	settings, fromFile := store.LoadSettings(*setPath, cfg)
 	if !fromFile {
 		// First run of this version: keep what an older config said (direction,
-		// refresh interval) once; from now on the settings file is the owner.
+		// refresh interval) once; from now on the settings file is the source of truth.
 		if err := store.SaveSettings(*setPath, settings); err != nil {
 			logger.Logf("settings: %v", err)
 		}

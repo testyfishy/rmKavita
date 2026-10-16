@@ -12,7 +12,7 @@ import (
 )
 
 func TestMessageLayoutMatchesReference(t *testing.T) {
-	// offsets verified on the device with luajit ffi.offsetof/sizeof against KOReader's qtfb_h.lua
+	// offsets verified on the device with luajit ffi.offsetof/sizeof against the protocol's C++ header
 	b := EncodeInit(245209899, FBFmtRMPPRGB565)
 	if len(b) != 24 || b[0] != MsgInitialize || le.Uint32(b[4:]) != 245209899 || b[8] != 3 {
 		t.Errorf("init = % x", b)

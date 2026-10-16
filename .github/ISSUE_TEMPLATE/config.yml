@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security problem privately
+    url: https://github.com/testyfishy/rmKavita/security/advisories/new
+    about: Please do not open a public issue for a security problem.
+  - name: User guide
+    url: https://github.com/testyfishy/rmKavita/blob/main/docs/USER-GUIDE.md
+    about: Settings, the A-Z bar, hot corners and troubleshooting.

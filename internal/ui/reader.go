@@ -907,7 +907,7 @@ func chapterTitle(t string) string {
 // ---- page-turn waveform -----------------------------------------------------------
 
 // baseWave is the turn waveform of a chapter: the configured page_mode. "auto"
-// is UI (the owner's panel preference: subjectively the fastest, and it keeps
+// is UI (the maintainer's panel preference: subjectively the fastest, and it keeps
 // colour); fast and content stay selectable.
 func (a *App) baseWave() display.Mode {
 	switch a.Cfg.Render {
@@ -926,7 +926,7 @@ func (a *App) speedMode() bool { return a.Cfg.Render == "speed" }
 
 // colourOn reports whether pages are decoded and shown in colour: the Colour
 // setting, except in speed mode, which is black and white. The setting itself
-// is never changed by the mode (so leaving Speed brings the owner's choice back
+// is never changed by the mode (so leaving Speed brings the user's choice back
 // exactly, also after a restart); every reader of "is colour on" asks this.
 func (a *App) colourOn() bool { return a.Set.Colour && !a.speedMode() }
 

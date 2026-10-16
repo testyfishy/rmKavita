@@ -11,7 +11,7 @@ import (
 // ShowMessage draws a one-screen notice (configuration problems, unsupported
 // device) with a Close button and waits for it, for the corner hold, for the
 // display to go away or for ctx to end. It is used before the app proper can
-// start, so the owner sees a reason instead of a window that vanishes.
+// start, so the user sees a reason instead of a window that vanishes.
 func ShowMessage(ctx context.Context, d display.Display, fonts *gfx.Fonts, lines ...string) {
 	w, h := d.Size()
 	k := float64(w) / 1620
