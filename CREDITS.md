@@ -73,7 +73,12 @@ Korean) are drawn with the Noto Sans fonts (SIL Open Font License) that the tabl
 them from the device at run time and does not ship them. The icons in the app (`internal/gfx`) and the launcher icon
 (`cmd/mkicon`) are drawn by the program's own code; no third-party icon set and no Kavita or reMarkable logo is used.
 
-## 5. Thank you
+## 5. How it was made
+
+rmKavita was written with Claude (Claude Code, by Anthropic), directed and tested on a real Paper Pro by its author.
+Commits that Claude wrote carry a `Co-Authored-By: Claude` line.
+
+## 6. Thank you
 
 To the maintainers of Kavita, AppLoad, xovi, KOReader and the other projects above, and to the people in the
 reMarkable community who documented how the tablet works. If rmKavita saves you time, they are the reason.

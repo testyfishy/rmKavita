@@ -86,6 +86,9 @@ manga readers should treat a page from **[Mihon](https://github.com/mihonapp/mih
 **[screentone](https://github.com/ophymx/screentone)** and **[Komga](https://github.com/gotson/komga)**. No code was
 copied from any of them. Every project, its licence and what it taught is listed in **[CREDITS.md](CREDITS.md)**.
 
+rmKavita was written with **[Claude](https://claude.com/claude-code)** (Claude Code, by Anthropic), directed and tested on a
+real tablet by its author.
+
 ## Licence
 
 rmKavita is **source-available**, not "open source" in the OSI sense. It is licensed under the

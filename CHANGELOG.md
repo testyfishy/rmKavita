@@ -10,6 +10,7 @@ Documentation and credits only; the program is the same as 0.3.1 apart from comm
   says plainly that no code was copied.
 - The comment on the qtfb message layout now cites AppLoad's protocol header instead of KOReader's FFI declaration.
 - Issue form, pull-request checklist and a link to private vulnerability reporting.
+- README and CREDITS say that rmKavita was written with Claude (Claude Code).
 
 ## 0.3.1
 
