@@ -130,6 +130,7 @@ type rigOpts struct {
 	app       func(*App)
 	pw, ph    int
 	signedOut bool
+	big       int // add a "Big Library" (the 3rd library) with this many generated series
 }
 
 func newRig(t *testing.T, o rigOpts) *rig {
@@ -143,6 +144,9 @@ func newRig(t *testing.T, o rigOpts) *rig {
 	}
 	r := &rig{t: t, conn: newVConn(), dir: t.TempDir()}
 	r.mock = mockkavita.Build(2, o.pages, o.pw, o.ph)
+	if o.big > 0 {
+		r.mock.AddBigLibrary(mockkavita.BigOptions{Series: o.big})
+	}
 	r.mock.SetFonts(fonts)
 	r.srv = httptest.NewServer(r.mock)
 	t.Cleanup(r.srv.Close)

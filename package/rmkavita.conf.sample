@@ -2,7 +2,7 @@
 #
 # Sign in on the device: the app writes `server`, `username` and `api_key` here
 # itself. The password is never stored. Lines starting with # are ignored.
-# Fit, refresh intervals, direction, colour, footer and DPI are
+# Fit, refresh intervals, direction, colour, footer, list view, alphabet bar and DPI are
 # chosen in the app's Settings screen and live in rmkavita-settings.json, not here.
 # The keys below are the display A/B kit and the memory budget. Settings ->
 # Advanced shows most of them; a change made there is written to this file.

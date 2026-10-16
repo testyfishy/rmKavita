@@ -28,6 +28,7 @@ or more efficient? If not, it is out.
 | 0.1 | prototype | OPDS browse, page streaming, centre-tap controls, corner holds, position memory |
 | 0.2 | done | Sign-in screen, Settings per document kind, account menu, Home, chrome hidden while reading, no flash per page turn, DPI auto, optional colour, PDF vs comic kinds |
 | 0.3.0 | **released** | Self-healing input tracker with counters; three tap columns, first / last page buttons, footer in the border colour; solid bars that open and close in two updates and no mode message; hot corners; margin trim and page-border colour match; RGBA8888 framebuffer with RGB565 fallback; one waveform per activity; one-sleep clearing refresh that waits for a pause; Render setting (quality / balanced / speed) with pre-quantised grey pages and Colour greyed out in Speed; read-ahead / keep-behind with a byte budget, a memory guard and floor; per-update telemetry with latencies; self-test with p50 / p95 timings; generic ssh installer, reproducible release script |
+| 0.3.1 | **released** | Long libraries: compact rows, the A-Z jump bar with a complete index loaded in the background, the session cache with a staleness check |
 | later | ideas | see backlog |
 
 ## Backlog
@@ -62,3 +63,6 @@ or more efficient? If not, it is out.
 | The newest press is always the gesture | A lost release or a resting palm must never make the app ignore the next touch |
 | Memory is a budget, not a count | The device has 2 GB; the thing to protect is xochitl, so the guard watches MemAvailable |
 | Licence: PolyForm Noncommercial 1.0.0 (source-available); commercial use needs a separate licence | The author keeps the right to offer the program commercially |
+| Long lists are compact above 40 entries; the A-Z bar needs an alphabetical list | A library of 900 series is 130 screens of 7 rows; a bar on an unordered list ("Recently Added") would lie |
+| A jump is one list-area update; the bar follows a drag with throttled small updates | Every extra update is a visible step on e-ink |
+| The index is the list itself, loaded in full in the background (cap 5000) | Letters must be real for the whole list; titles and links are a few hundred KB |

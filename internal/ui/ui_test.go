@@ -154,6 +154,10 @@ type hopts struct {
 	pages     int // pages per chapter of the first library (default 12)
 	pw, ph    int // source page size (default 300x450)
 	app       func(*App)
+	big       int // add a "Big Library" with this many generated series
+	bigArt    bool
+	bigRaw    bool
+	delay     time.Duration // artificial latency of every request
 }
 
 func startHarness(t *testing.T, mut func(*store.Config), statePath string) *harness {
@@ -177,6 +181,12 @@ func startOpts(t *testing.T, o hopts) *harness {
 		o.pw, o.ph = 300, 450
 	}
 	h.mock = mockkavita.Build(25, o.pages, o.pw, o.ph)
+	if o.big > 0 {
+		h.mock.AddBigLibrary(mockkavita.BigOptions{Series: o.big, ArticleSort: o.bigArt, Unsorted: o.bigRaw})
+	}
+	if o.delay > 0 {
+		h.mock.SetDelay(o.delay)
+	}
 	h.mock.SetFonts(fonts)
 	h.srv = httptest.NewServer(h.mock)
 	t.Cleanup(h.srv.Close)

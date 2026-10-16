@@ -146,7 +146,7 @@ func (a *App) onSearch(m searchMsg) {
 		return
 	}
 	a.kb = nil
-	nv := &listView{title: m.title, url: m.url, loading: true}
+	nv := &listView{title: m.title, url: m.url, loading: true, search: true}
 	a.pushList(nv)
 	a.loadList(nv, false)
 	a.render("search-results")

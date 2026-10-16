@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.1
+
+Long libraries.
+
+- Compact list view: one-line rows of 64 px at 229 dpi, about 27 to a screen instead of 7, no covers. Settings ->
+  Lists: Auto (compact when a list has more than 40 entries), Compact, Comfortable. Search results, the home menu
+  and the list of libraries keep the old rows.
+- A-Z jump bar on the right edge (27 targets, # and A-Z, 7 mm wide): tap a letter to put its first entry on top;
+  dragging along the bar outlines the letter under the finger and the jump happens on release. Letters with no
+  entries are dim. Settings -> Alphabet bar: Auto (long lists that are in alphabetical order, with at least three
+  letters), On, Off. A press on the bar is never a page swipe and never a hot-corner hold.
+- The whole list is loaded in the background, one catalogue page after the other (up to 5000 entries), with
+  "Loading list 3/45" in the footer. The index is the list itself: titles, links, cover links and progress marks
+  only. A list that was loaded completely is shown at once the next time it is opened in the same session, after
+  one request for its first page to see whether anything changed.
+- Letters: the first letter or digit of the title; accents are folded, leading punctuation is skipped, digits,
+  symbols and non-Latin scripts are under #. If the server sorts by a name without a leading "The", "A" or "An" the
+  bar follows that.
+- One update per action: a jump or a scroll repaints the list area once (rows, bar and footer together); the
+  outline that follows a dragging finger is at most one small update per 300 ms; the background loading repaints
+  the footer and the bar at most every 2 seconds. No refresh-mode message is sent for any of it.
+- The mock server and `cmd/mockopds` can generate a library of any size (`-big 1000`) for testing.
+
 ## 0.3.0
 
 The first public release. It collects the work of the 0.3 release candidates.

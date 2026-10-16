@@ -21,7 +21,7 @@ import (
 	"rmkavita/internal/ui"
 )
 
-var version = "0.3.0"
+var version = "0.3.1"
 
 func env(k, def string) string {
 	if v := os.Getenv(k); v != "" {

@@ -107,6 +107,31 @@ prefetching when MemAvailable falls below `mem_guard_mb`; the current page is al
 - **Positions.** Stored per server and user in a small JSON file, with a per-mille offset inside the page; reported to
   Kavita after a pause.
 
+## Long lists
+
+- **Compact rows.** A list of more than 40 entries (`Settings -> Lists`) is drawn as one-line rows (64 px at
+  229 dpi, the device density scales it): the title, a chevron or a progress mark, no cover. About 27 rows fit
+  where the comfortable view has 7. The home menu, the list of libraries and search results always keep the
+  comfortable rows.
+- **The index.** OPDS feeds are paged (20 entries). When a list is long and still alphabetical as the pages arrive,
+  the remaining pages are fetched one after the other in the background (cap 5000 entries). Nothing is stored
+  besides the rows the list already has (title, links, cover link, progress mark: a few hundred KB for a thousand
+  series). Each title is keyed by its first alphanumeric character (accents folded, leading punctuation skipped,
+  everything that is not a Latin letter under `#`); the keys are computed with and without a leading article and the
+  way that makes the list the more alphabetical is used, so a server that sorts by name without "The" is followed.
+  The jump target of a letter is the first row with that key.
+- **The bar.** 27 targets of the list area height / 27 (64 px on the Paper Pro, 44 px on the Move) in a solid strip
+  7 mm wide at the right edge, drawn with the rows. A press that starts on it is a letter pick: it never becomes a
+  page swipe and never arms a corner hold; the letter under the finger when it lifts is the jump. While the finger
+  moves, the letter under it is outlined with one small update, at most every 300 ms.
+- **Updates.** A jump or a page scroll repaints rows, bar and footer in one update of the list area. The background
+  loading repaints the footer and the bar (the letters that came alive) at most every 2 seconds and once more
+  when it ends. None of it sends a refresh-mode message.
+- **Session cache.** A list that was loaded completely is kept for the session (three lists, 15 minutes). Opening it
+  again shows it at once and fetches page 1: if the total, or the titles and progress marks of that page differ,
+  the cache entry is dropped and the list is loaded again; if not, nothing is repainted. Going Back from a series
+  to the list keeps its place and letter (the list is still on the screen stack; no request).
+
 ## Input
 
 - The panel's read loop only appends to a bounded queue (moves are coalesced, a full queue sheds the oldest move

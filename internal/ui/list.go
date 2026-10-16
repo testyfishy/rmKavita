@@ -58,6 +58,14 @@ type listView struct {
 	// shownLoading: the footer on screen currently says "Loading".
 	shownLoading bool
 	hidden       int // entries of this list that are not shown (no page stream)
+
+	// long lists (see alpha.go)
+	alpha   *alphaIdx // the letter index, rebuilt when the rows change
+	filling bool      // the remaining pages are being fetched in the background
+	pages   int       // catalogue pages loaded so far
+	perPage int       // entries per catalogue page
+	search  bool      // search results keep the old view
+	verify  bool      // the rows came from the session cache; page 1 is being compared
 }
 
 // ---- geometry ---------------------------------------------------------------
@@ -66,12 +74,15 @@ func (a *App) footerH() int    { return a.u(190) }
 func (a *App) rowH() int       { return a.u(170) }
 func (a *App) listTop() int    { return a.barRect().Max.Y }
 func (a *App) listBottom() int { return a.H - a.footerH() }
+
+// rowsPerPage is the number of rows a page of the list on top holds (the
+// comfortable and the compact view differ).
 func (a *App) rowsPerPage() int {
-	n := (a.listBottom() - a.listTop()) / a.rowH()
-	if n < 1 {
-		n = 1
+	var lv *listView
+	if len(a.stack) > 0 {
+		lv = a.top()
 	}
-	return n
+	return a.rowsFor(lv)
 }
 
 // ---- loading ----------------------------------------------------------------
@@ -185,6 +196,10 @@ func (a *App) onFeed(m feedMsg) {
 	if !a.inStack(lv) {
 		return
 	}
+	if m.verify {
+		a.onVerify(m)
+		return
+	}
 	lv.loading = false
 	if m.err != nil {
 		a.logf("feed error: %s", m.err.Error())
@@ -193,9 +208,14 @@ func (a *App) onFeed(m feedMsg) {
 		}
 		if m.appnd && !lv.jump {
 			// A read-ahead of the next page failed while nobody asked for it: keep
-			// the list on screen. The next-page chevron tries again (and then
-			// reports the error if it fails again).
+			// the list on screen (a background fill stops with what it has). The
+			// next-page chevron tries again (and then reports the error if it
+			// fails again).
 			lv.nextFailed = true
+			if lv.filling {
+				lv.filling = false
+				a.fillProgress(lv, true)
+			}
 			return
 		}
 		lv.err = m.err
@@ -214,6 +234,7 @@ func (a *App) onFeed(m feedMsg) {
 		lv.hidden += hidden
 	}
 	titleBefore, searchBefore := lv.title, a.searchURL
+	cmpBefore, alphaBefore, wasFilling := a.compactList(lv), a.alphaShown(lv), lv.filling
 	oldLen := len(lv.rows)
 	if m.appnd {
 		lv.rows = append(lv.rows, rows...)
@@ -234,6 +255,8 @@ func (a *App) onFeed(m feedMsg) {
 	if lv.title == "" {
 		lv.title = f.Title
 	}
+	a.afterPage(lv, m.appnd, f)
+	reshaped := a.compactList(lv) != cmpBefore || a.alphaShown(lv) != alphaBefore
 	if lv.home && !m.appnd {
 		if sd := f.SearchDescription(); sd != "" {
 			a.searchURL = a.resolve(sd, m.reqURL)
@@ -259,7 +282,13 @@ func (a *App) onFeed(m feedMsg) {
 		switch {
 		case !m.appnd:
 			render("list")
-		case wasJump || lv.shownLoading:
+		case wasJump || reshaped:
+			render("list-more")
+		case lv.filling:
+			a.fillProgress(lv, false) // the footer count and the bar, no faster than every 2 s
+		case wasFilling:
+			a.fillProgress(lv, true) // the last page: "Loading list" goes away, letters come alive
+		case lv.shownLoading:
 			render("list-more")
 		default:
 			// The next 20 rows arrived behind the ones on screen: nothing visible
@@ -338,6 +367,36 @@ func (a *App) pieFrac(r *row) (float64, bool) {
 	return 0, false
 }
 
+// drawRowCompact is the one-line row of a long list: the title, a small
+// progress mark, a chevron for a folder. The whole width is the touch target.
+func (a *App) drawRowCompact(r *row, y, h int) {
+	c := a.cv
+	m := a.margin()
+	right := a.listRight - m
+	mark := a.u(44)
+	switch r.kind {
+	case rowFolder:
+		c.Chevron(right-a.u(10), y+h/2, a.u(26), 1, a.u(5), inkBlack)
+		if f, ok := a.pieFrac(r); ok && r.prog != opds.ProgressUnknown {
+			cx, rad := right-a.u(54), a.u(14)
+			c.Ring(cx, y+h/2, rad, a.u(3), inkBlack)
+			c.Pie(cx, y+h/2, rad-a.u(6), f, inkBlack)
+			mark += a.u(46)
+		}
+	case rowChapter, rowContinue:
+		cx, cy, rad := right-a.u(16), y+h/2, a.u(16)
+		c.Ring(cx, cy, rad, a.u(3), inkBlack)
+		if f, ok := a.pieFrac(r); ok {
+			c.Pie(cx, cy, rad-a.u(6), f, inkBlack)
+		}
+		mark += a.u(10)
+	}
+	ts := a.st(38, r.kind == rowContinue, inkBlack)
+	t := a.Fonts.Ellipsize(r.title, right-m-mark, ts)
+	a.Fonts.Draw(c, m, a.textBaseline(y, h, ts.Size), t, ts)
+	c.Fill(image.Rect(m, y+h-a.u(1)-1, right, y+h), inkRule)
+}
+
 func (a *App) drawRow(r *row, y int, withThumb bool) {
 	c := a.cv
 	h := a.rowH()
@@ -355,12 +414,12 @@ func (a *App) drawRow(r *row, y int, withThumb bool) {
 		}
 		x = m + tw + a.u(28)
 	}
-	right := a.W - m - a.u(70)
+	right := a.listRight - m - a.u(70)
 	switch r.kind {
 	case rowFolder:
-		c.Chevron(a.W-m-a.u(20), y+h/2, a.u(40), 1, a.u(7), inkBlack)
+		c.Chevron(a.listRight-m-a.u(20), y+h/2, a.u(40), 1, a.u(7), inkBlack)
 	case rowChapter, rowContinue:
-		cx, cy, rad := a.W-m-a.u(30), y+h/2, a.u(26)
+		cx, cy, rad := a.listRight-m-a.u(30), y+h/2, a.u(26)
 		c.Ring(cx, cy, rad, a.u(4), inkBlack)
 		if f, ok := a.pieFrac(r); ok {
 			c.Pie(cx, cy, rad-a.u(8), f, inkBlack)
@@ -383,7 +442,7 @@ func (a *App) drawRow(r *row, y int, withThumb bool) {
 			a.Fonts.Draw(c, x, y+h/2+a.u(44), lines[1], ts)
 		}
 	}
-	c.Fill(image.Rect(m, y+h-a.u(2), a.W-m, y+h), inkRule)
+	c.Fill(image.Rect(m, y+h-a.u(2), a.listRight-m, y+h), inkRule)
 }
 
 func (a *App) rowSub(r *row) string {
@@ -404,10 +463,20 @@ func (a *App) drawList(lv *listView) {
 	a.drawHeader(hdr{title: lv.title, back: len(a.stack) > 1, home: true, homeActive: len(a.stack) > 1,
 		search: a.searchURL != "", gear: true, account: true})
 
-	n := a.rowsPerPage()
+	n := a.rowsFor(lv)
+	rh := a.rowHeightFor(lv)
+	compact := a.compactList(lv)
 	top := a.listTop()
+	a.listRight = a.W
+	a.alpha.on = false
+	if len(lv.rows) > 0 && lv.err == nil {
+		a.layoutAlpha(lv)
+		if a.alpha.on {
+			a.listRight = a.W - a.alphaBarW()
+		}
+	}
 	withThumb := false
-	if a.Cfg.Covers {
+	if a.Cfg.Covers && !compact {
 		for i := range lv.rows {
 			if lv.rows[i].thumb != "" {
 				withThumb = true
@@ -438,13 +507,26 @@ func (a *App) drawList(lv *listView) {
 		}
 		for i := 0; i < n && lo+i < len(lv.rows); i++ {
 			r := &lv.rows[lo+i]
-			y := top + i*a.rowH()
-			a.drawRow(r, y, withThumb)
+			y := top + i*rh
+			if compact {
+				a.drawRowCompact(r, y, rh)
+			} else {
+				a.drawRow(r, y, withThumb)
+			}
 			idx := lo + i
-			a.addNamedHit(fmt.Sprintf("row-%d", i), image.Rect(0, y, a.W, y+a.rowH()), func() { a.rowTap(lv, idx) })
+			a.addNamedHit(fmt.Sprintf("row-%d", i), image.Rect(0, y, a.listRight, y+rh), func() { a.rowTap(lv, idx) })
+		}
+		if a.alpha.on {
+			a.layoutAlpha(lv) // the scroll offset may have been clamped above
+			a.drawAlpha()
+			for i := 0; i < alphaLetters; i++ {
+				if a.alpha.active[i] {
+					li := i
+					a.addNamedHit("alpha-"+letterName(i), a.alphaCell(i), func() { a.alphaJump(lv, li) })
+				}
+			}
 		}
 	}
-	_ = top
 	a.drawFooter(lv, n)
 	a.drawPopover()
 }
@@ -481,7 +563,10 @@ func (a *App) drawFooter(lv *listView, n int) {
 			label += " ..."
 		}
 		lv.shownLoading = lv.loading
-		if lv.loading {
+		switch {
+		case lv.filling && lv.loading:
+			label = lv.fillLabel()
+		case lv.loading:
 			label = "Loading"
 		}
 		s := a.st(38, false, inkDim)
@@ -565,6 +650,16 @@ func (a *App) rowTap(lv *listView, idx int) {
 	r := lv.rows[idx]
 	switch r.kind {
 	case rowFolder:
+		if e := a.cachedList(r.href); e != nil {
+			// a long list already loaded this session: shown at once, and page 1 is
+			// fetched to see whether anything changed
+			nv := &listView{title: r.title, url: r.href, rows: append([]row(nil), e.rows...), total: e.total,
+				hidden: e.hidden, pages: e.pages, perPage: e.per, verify: true}
+			a.pushList(nv)
+			a.verifyList(nv)
+			a.render("open")
+			return
+		}
 		nv := &listView{title: r.title, url: r.href, loading: true}
 		a.pushList(nv)
 		a.loadList(nv, false)
@@ -669,7 +764,7 @@ func (a *App) goHome() {
 // ---- covers -----------------------------------------------------------------
 
 func (a *App) wantThumbs(lv *listView) {
-	if !a.Cfg.Covers || lv.err != nil {
+	if !a.Cfg.Covers || lv.err != nil || a.compactList(lv) {
 		return
 	}
 	n := a.rowsPerPage()
@@ -757,10 +852,13 @@ func (a *App) renderCovers() {
 	n := a.rowsPerPage()
 	top := a.listTop()
 	var rows []image.Rectangle
+	if a.compactList(lv) {
+		return // no covers in the compact view
+	}
 	for i := 0; i < n && lv.scroll+i < len(lv.rows); i++ {
 		if t := a.thumbs[lv.rows[lv.scroll+i].thumb]; t != nil && t.state == 2 && t.img != nil && !t.shown {
-			y := top + i*a.rowH()
-			rows = append(rows, image.Rect(0, y, a.W, y+a.rowH()))
+			y := top + i*a.rowHeightFor(lv)
+			rows = append(rows, image.Rect(0, y, a.listRight, y+a.rowHeightFor(lv)))
 		}
 	}
 	a.drawList(lv)

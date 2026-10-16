@@ -505,3 +505,31 @@ func TestRemovedContinuousKeysAreIgnoredSilently(t *testing.T) {
 		t.Errorf("a removed key changed something: %+v", c)
 	}
 }
+
+// The list settings default to auto, an old file without them reads as auto and
+// an unknown value is replaced by auto.
+func TestListSettingsDefaultsAndSanitize(t *testing.T) {
+	d := DefaultSettings()
+	if d.Lists != ListsAuto || d.Alpha != AlphaAuto {
+		t.Fatalf("defaults: %q %q", d.Lists, d.Alpha)
+	}
+	p := filepath.Join(t.TempDir(), "s.json")
+	os.WriteFile(p, []byte(`{"v":1,"comic":{"fit":"both"},"pdf":{"fit":"width"},"rtl":true,"refresh":0,"custom":[10,30,50],"footer":true}`), 0o600)
+	s, ok := LoadSettings(p, DefaultConfig())
+	if !ok || s.Lists != ListsAuto || s.Alpha != AlphaAuto {
+		t.Errorf("an old file: %+v ok=%v", s, ok)
+	}
+	os.WriteFile(p, []byte(`{"v":1,"lists":"huge","alpha":"sometimes"}`), 0o600)
+	s, _ = LoadSettings(p, DefaultConfig())
+	if s.Lists != ListsAuto || s.Alpha != AlphaAuto {
+		t.Errorf("unknown values: %q %q", s.Lists, s.Alpha)
+	}
+	s.Lists, s.Alpha = ListsCompact, AlphaOff
+	if err := SaveSettings(p, s); err != nil {
+		t.Fatal(err)
+	}
+	s2, _ := LoadSettings(p, DefaultConfig())
+	if s2.Lists != ListsCompact || s2.Alpha != AlphaOff {
+		t.Errorf("round trip: %q %q", s2.Lists, s2.Alpha)
+	}
+}

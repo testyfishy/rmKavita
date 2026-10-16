@@ -27,6 +27,7 @@ const (
 )
 
 type touchState struct {
+	alpha     bool // the press began on the A-Z bar: it is a letter pick, never a swipe
 	active    bool
 	id        int
 	x0, y0    int
@@ -142,7 +143,11 @@ func (a *App) resetPress() {
 	a.stopHold()
 	a.stopRepeat()
 	a.stopTouchTimer()
+	onBar := a.touch.alpha
 	a.touch = touchState{}
+	if onBar {
+		a.alphaClearHint() // the outline of a pick that was let go of
+	}
 }
 
 // cancelPress abandons the press in progress without acting on it: no tap, no
@@ -350,9 +355,10 @@ func (a *App) onTouch(ev display.Event) {
 		a.stopHold()
 		a.stopRepeat()
 		*t = touchState{active: true, id: ev.ID, x0: ev.X, y0: ev.Y, x: ev.X, y: ev.Y, ax: ev.X, ay: ev.Y, t0: now, lastMove: now, edge: edge}
+		t.alpha = a.alphaHit(ev.X, ev.Y)
 		a.ts.started++
 		delay := a.palmDelay()
-		if c := a.cornerAt(ev.X, ev.Y); c != cornerNone && !edge && a.holdWanted(c) {
+		if c := a.cornerAt(ev.X, ev.Y); c != cornerNone && !edge && !t.alpha && a.holdWanted(c) {
 			hold := time.Duration(a.Cfg.HoldMs) * time.Millisecond
 			a.holdT.Reset(hold)
 			if hold+400*time.Millisecond > delay {
@@ -371,6 +377,9 @@ func (a *App) onTouch(ev display.Event) {
 			return
 		}
 		t.x, t.y = ev.X, ev.Y
+		if t.alpha {
+			a.alphaMove(ev.Y)
+		}
 		if dist2(t.ax, t.ay, ev.X, ev.Y) >= stillPx*stillPx {
 			t.ax, t.ay, t.lastMove = ev.X, ev.Y, now
 			if t.repName == "" && !t.holdFired {
@@ -402,11 +411,16 @@ func (a *App) onTouch(ev display.Event) {
 		fired := t.holdFired || t.repFired
 		repeated := t.repFired
 		x0, y0, x, y := t.x0, t.y0, t.x, t.y
+		onBar := t.alpha
 		*t = touchState{}
 		if repeated {
 			a.flushSettings() // a held stepper is written once, when the finger lifts
 		}
 		if fired {
+			return
+		}
+		if onBar {
+			a.alphaRelease(y) // a letter pick: the letter under the finger when it lifts
 			return
 		}
 		a.gesture(x0, y0, x, y)

@@ -23,6 +23,8 @@ content, no account); the pages are generated line art.
 - Signs in with your Kavita user name and password. The password is never stored; the app keeps the server address,
   your user name and the OPDS key Kavita returns, in a file only the tablet's `root` can read.
 - Browses your libraries and series over OPDS, shows covers, searches.
+- **Long libraries**: a list of more than 40 entries is shown in compact one-line rows (about 27 to a screen), and an
+  A-Z bar on the right edge jumps to the first entry of a letter; the whole list is loaded in the background.
 - Reads comics (CBZ / CBR / image folders) and PDFs that Kavita serves as page images: page by page, fit width /
   height / both (a page taller than the screen scrolls inside itself first), left-to-right or right-to-left,
   optional colour.
@@ -56,13 +58,13 @@ content, no account); the pages are generated line art.
 
 ## Install
 
-Download the release tarball (`rmkavita-0.3.0-linux-arm64.tar.gz` with `SHA256SUMS`) or build it yourself
+Download the release tarball (`rmkavita-0.3.1-linux-arm64.tar.gz` with `SHA256SUMS`) or build it yourself
 (see below), then:
 
 ```sh
 sha256sum -c SHA256SUMS                   # optional: check the download
-tar xzf rmkavita-0.3.0-linux-arm64.tar.gz
-cd rmkavita-0.3.0
+tar xzf rmkavita-0.3.1-linux-arm64.tar.gz
+cd rmkavita-0.3.1
 cp install/install.conf.sample install/install.conf   # TABLET_HOST, SSH_KEY, PACKAGE_DIR, the Kavita address
 ./install/install.sh --dry-run            # read-only checks and the plan; changes nothing
 ./install/install.sh
@@ -99,6 +101,12 @@ AppLoad drops the entry at its next reload.
 <img src="docs/screenshots/03-library.png" width="31%" alt="A library">
 </p>
 
+<p>
+<img src="docs/screenshots/11-long-list.png" width="31%" alt="A library of 900 series in compact rows with the A-Z bar">
+<img src="docs/screenshots/12-alphabet-jump.png" width="31%" alt="After tapping M on the bar">
+<img src="docs/screenshots/13-settings-lists.png" width="31%" alt="Settings: Lists and Alphabet bar">
+</p>
+
 ## Settings tour
 
 <p>
@@ -114,6 +122,8 @@ AppLoad drops the entry at its next reload.
 - **Colour**: black and white (default) or colour. Colour is slower and ghosts more.
 - **Render**: *Quality* (every grey, the slowest waveform), *Balanced* (the default), *Speed* (grey, two grey
   levels, pages prepared ahead; the colour rows are greyed out while it is on).
+- **Lists**: *Auto* (compact when a list has more than 40 entries), *Compact* or *Comfortable* (rows with covers).
+- **Alphabet bar**: *Auto* (long lists that are in alphabetical order), *On* or *Off*.
 - **Screen density**: auto from the device, or a custom dpi.
 - **Hot corners**: what holding each corner does.
 - **Advanced**: the display A/B kit (waveform per activity, clearing refresh style and timing, bars repaint,
@@ -140,6 +150,9 @@ the panel server slept; never a URL, key or password).
   the account menu or the Sign-in screen; the key is replaced in the config file.
 - **The UI crashes right after replacing the app.** Tap AppLoad's reload button before opening the new copy.
 - **Greys look tinted.** Settings -> Advanced -> Framebuffer -> RGB565 (or `fb_format = rgb565`), then relaunch.
+- **The A-Z bar is missing.** Auto shows it for lists of more than 40 entries that are in alphabetical order (not for
+  "Recently Added" or a list of volumes); Settings -> Alphabet bar -> On shows it anywhere. Until the list has been
+  loaded completely ("Loading list 3/45" in the footer) letters that have no entries yet are dim.
 - **Page turns flash or ghost.** Advanced -> Page turns: UI is the default; try Fast or Content. Clearing
   refresh: Content + full refresh clears harder (and costs two more one-second waits).
 - **Page turns are too slow.** Settings -> Render -> Speed (Advanced -> Speed levels 2 / 4 / 16, Speed dither).

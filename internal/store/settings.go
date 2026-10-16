@@ -70,7 +70,26 @@ type Settings struct {
 	ColourCustom  [3]int `json:"colour_custom"`
 	// Footer: the always-visible status strip under the page.
 	Footer bool `json:"footer"`
+	// Lists: comfortable rows with covers, or compact one-line rows; auto = compact
+	// when the list has more than CompactOver entries.
+	Lists string `json:"lists"` // auto | compact | comfortable
+	// Alpha: the A-Z jump bar on the right edge of long lists; auto = on when
+	// the list is alphabetical and has more than CompactOver entries.
+	Alpha string `json:"alpha"` // auto | on | off
 }
+
+// Lists and Alpha values.
+const (
+	ListsAuto        = "auto"
+	ListsCompact     = "compact"
+	ListsComfortable = "comfortable"
+	AlphaAuto        = "auto"
+	AlphaOn          = "on"
+	AlphaOff         = "off"
+	// CompactOver is the number of entries above which a list is long: Auto
+	// shows it compact and with the alphabet bar.
+	CompactOver = 40
+)
 
 // DefaultSettings are the out-of-the-box choices per document kind.
 func DefaultSettings() Settings {
@@ -86,6 +105,8 @@ func DefaultSettings() Settings {
 		ColourRefresh: ColourEvery5,
 		ColourCustom:  [3]int{7, 15, 30},
 		Footer:        true,
+		Lists:         ListsAuto,
+		Alpha:         AlphaAuto,
 	}
 }
 
@@ -112,6 +133,16 @@ func (s *Settings) Sanitize() {
 	}
 	if s.DPI != 0 {
 		s.DPI = clampInt(s.DPI, MinDPI, MaxDPI)
+	}
+	switch s.Lists {
+	case ListsAuto, ListsCompact, ListsComfortable:
+	default:
+		s.Lists = ListsAuto
+	}
+	switch s.Alpha {
+	case AlphaAuto, AlphaOn, AlphaOff:
+	default:
+		s.Alpha = AlphaAuto
 	}
 	if s.ColourRefresh < ColourEvery5 || s.ColourRefresh > ColourNever {
 		s.ColourRefresh = ColourEvery5

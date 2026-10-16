@@ -41,6 +41,7 @@ type (
 		err    *opds.Error
 		appnd  bool
 		reqURL string
+		verify bool // page 1 of a list shown from the session cache
 	}
 	pageMsg struct {
 		r   *reader
@@ -167,22 +168,26 @@ type App struct {
 	thumbs     map[string]*thumb
 	thumbOrd   []string
 
-	rootPath    string
-	searchURL   string
-	rechecking  bool
-	sinceFull   int
-	syncDelay   time.Duration // pause after a page turn before progress is re-synced
-	overlayFor  time.Duration // overlay auto-hide delay
-	slotSeq     int
-	consumed    int
-	decodeSem   chan struct{} // two tokens: a small page takes one, a big one (> 4 MP) both
-	decodeMu    sync.Mutex
-	quitting    bool
-	reason      string
-	pagesDirty  bool         // a setting that changes how pages are fitted was edited
-	t0          time.Time    // start of the process (telemetry clock)
-	armed       display.Mode // the refresh mode the server has been told
-	memAvail    func() int   // MemAvailable in MB, -1 when unknown (tests replace it)
+	rootPath   string
+	searchURL  string
+	rechecking bool
+	sinceFull  int
+	syncDelay  time.Duration // pause after a page turn before progress is re-synced
+	overlayFor time.Duration // overlay auto-hide delay
+	slotSeq    int
+	consumed   int
+	decodeSem  chan struct{} // two tokens: a small page takes one, a big one (> 4 MP) both
+	decodeMu   sync.Mutex
+	quitting   bool
+	reason     string
+	pagesDirty bool // a setting that changes how pages are fitted was edited
+
+	alpha       alphaView                  // the A-Z bar of the list on screen, as last drawn
+	listRight   int                        // right edge of the list rows (the bar is to its right)
+	listCache   map[string]*listCacheEntry // long lists loaded this session
+	t0          time.Time                  // start of the process (telemetry clock)
+	armed       display.Mode               // the refresh mode the server has been told
+	memAvail    func() int                 // MemAvailable in MB, -1 when unknown (tests replace it)
 	memWarned   bool
 	floorWarned bool
 	handOver    *warmPage // the warm page of the reader being replaced (openReader takes it)
@@ -610,6 +615,7 @@ func (a *App) startSession(server, user, key string) {
 	a.rootPath = "/api/opds/" + key
 	a.searchURL = ""
 	a.thumbs, a.thumbOrd = map[string]*thumb{}, nil
+	a.listCache = nil
 	a.si, a.sv, a.kb, a.rd = nil, nil, nil, nil
 	a.pop = popover{}
 	home := &listView{title: "rmKavita", url: opds.RootURL(base, key), home: true, loading: true}
@@ -637,6 +643,7 @@ func (a *App) endSession(notice string) {
 	a.pop = popover{}
 	a.stack = nil
 	a.thumbs, a.thumbOrd = map[string]*thumb{}, nil
+	a.listCache = nil
 	a.searchURL = ""
 	_ = a.Pos.Flush()
 	a.Pos.SetOwner("")

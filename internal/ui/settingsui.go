@@ -460,6 +460,15 @@ func (a *App) settingsRows() []srow {
 	if a.Cfg.Render == "speed" {
 		rows = append(rows, srow{typ: srInfo, label: fmt.Sprintf("Speed: grey, %d levels", a.Cfg.SpeedLevels)})
 	}
+	// long lists: compact rows and the A-Z bar (see alpha.go)
+	rows = append(rows, srow{typ: srSection, label: "Lists"},
+		srow{typ: srRadio, name: "lists-auto", label: "Auto (compact over 40)", sel: s.Lists == store.ListsAuto, fn: func() { s.Lists = store.ListsAuto; a.settingsChanged(false) }},
+		srow{typ: srRadio, name: "lists-compact", label: "Compact", sel: s.Lists == store.ListsCompact, fn: func() { s.Lists = store.ListsCompact; a.settingsChanged(false) }},
+		srow{typ: srRadio, name: "lists-comfortable", label: "Comfortable", sel: s.Lists == store.ListsComfortable, fn: func() { s.Lists = store.ListsComfortable; a.settingsChanged(false) }},
+		srow{typ: srSection, label: "Alphabet bar"},
+		srow{typ: srRadio, name: "alpha-auto", label: "Auto (long alphabetical lists)", sel: s.Alpha == store.AlphaAuto, fn: func() { s.Alpha = store.AlphaAuto; a.settingsChanged(false) }},
+		srow{typ: srRadio, name: "alpha-on", label: "On", sel: s.Alpha == store.AlphaOn, fn: func() { s.Alpha = store.AlphaOn; a.settingsChanged(false) }},
+		srow{typ: srRadio, name: "alpha-off", label: "Off", sel: s.Alpha == store.AlphaOff, fn: func() { s.Alpha = store.AlphaOff; a.settingsChanged(false) }})
 	dpiVal := s.DPI
 	if dpiVal == 0 {
 		dpiVal = a.autoDPI()
