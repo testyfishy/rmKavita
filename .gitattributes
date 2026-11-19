@@ -1,0 +1,7 @@
+# Shell scripts and the files copied onto devices keep Unix line endings on
+# every checkout (busybox sh and NickelMenu do not read CRLF).
+*.sh text eol=lf
+package/kobo/** text eol=lf
+install/units/* text eol=lf
+*.png binary
+*.webp binary

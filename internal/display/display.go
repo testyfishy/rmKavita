@@ -63,6 +63,16 @@ const (
 	// the PNG test backend does, so sign-in can be scripted without computing
 	// key coordinates.
 	Key
+	// Button is a hardware button press (Event.Text is one of the Btn names).
+	// The Kobo backend produces it for the page-turn keys and the power key.
+	Button
+)
+
+// Hardware button names carried by a Button event.
+const (
+	BtnNext  = "next"  // the page-forward key
+	BtnPrev  = "prev"  // the page-back key
+	BtnPower = "power" // the power key: leave the app
 )
 
 // Event is one touch (or pen) sample in framebuffer pixels.

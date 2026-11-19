@@ -37,6 +37,14 @@ func (a *App) errPage(r *reader) int {
 	if s := r.slots[r.page]; s != nil && s.state == 3 {
 		return r.page
 	}
+	if a.continuousOn(r) {
+		ps, _ := a.contPages(r)
+		for _, n := range ps {
+			if s := r.slots[n]; s != nil && s.state == 3 {
+				return n
+			}
+		}
+	}
 	return -1
 }
 
@@ -44,6 +52,9 @@ func (a *App) errPage(r *reader) int {
 // missing. Every offset is a whole pixel: a page always lands on exact pixel
 // boundaries.
 func (a *App) viewportPieces(r *reader) []piece {
+	if a.continuousOn(r) {
+		return a.contPieces(r)
+	}
 	f := r.ready(r.page)
 	if f == nil {
 		return nil

@@ -6,13 +6,26 @@ import (
 	"os"
 )
 
-// Fit modes. (There is no continuous reading mode: an e-ink panel is not built
-// for scrolling; an old settings file that names one is read and the field is
-// dropped at the next save.)
+// Fit modes.
 const (
 	FitBoth   = "both"
 	FitWidth  = "width"
 	FitHeight = "height"
+)
+
+// Scroll modes. Page shows one page at a time (a page taller than the screen
+// scrolls inside itself, then turns); Continuous stacks the pages of a chapter
+// into one strip that moves a screen at a time (a tap, a side button) or by
+// the length of a swipe. Continuous is the Kobo default.
+const (
+	ScrollPage       = "page"
+	ScrollContinuous = "continuous"
+)
+
+// Side-button orders (devices with page-turn keys).
+const (
+	ButtonsNormal  = "normal"  // the key the kernel calls "back" goes back
+	ButtonsSwapped = "swapped" // the two keys trade places
 )
 
 // Refresh choices: the active radio row of the "Full refresh" list.
@@ -50,8 +63,12 @@ const (
 
 // Prefs are the reading preferences of one document kind.
 type Prefs struct {
-	Fit string `json:"fit"` // both | width | height
+	Fit    string `json:"fit"`              // both | width | height
+	Scroll string `json:"scroll,omitempty"` // page | continuous ("" = page)
 }
+
+// Continuous reports whether pages of this kind are read as one strip.
+func (p Prefs) Continuous() bool { return p.Scroll == ScrollContinuous }
 
 // Settings are the non-secret preferences the Settings screen edits. They live
 // in their own file (no key, no user name) and apply immediately.
@@ -76,6 +93,8 @@ type Settings struct {
 	// Alpha: the A-Z jump bar on the right edge of long lists; auto = on when
 	// the list is alphabetical and has more than CompactOver entries.
 	Alpha string `json:"alpha"` // auto | on | off
+	// Buttons: which side key goes forward (devices with page-turn keys).
+	Buttons string `json:"buttons,omitempty"` // normal | swapped
 }
 
 // Lists and Alpha values.
@@ -95,8 +114,8 @@ const (
 func DefaultSettings() Settings {
 	return Settings{
 		V:       1,
-		Comic:   Prefs{Fit: FitBoth},
-		PDF:     Prefs{Fit: FitWidth},
+		Comic:   Prefs{Fit: FitBoth, Scroll: ScrollPage},
+		PDF:     Prefs{Fit: FitWidth, Scroll: ScrollPage},
 		RTL:     true,
 		Refresh: RefreshDefault,
 		Custom:  [3]int{10, 30, 50},
@@ -107,12 +126,29 @@ func DefaultSettings() Settings {
 		Footer:        true,
 		Lists:         ListsAuto,
 		Alpha:         AlphaAuto,
+		Buttons:       ButtonsNormal,
 	}
+}
+
+// DefaultSettingsFor is DefaultSettings for a platform: on a Kobo, comics open
+// fit to width in the continuous strip (the side keys move a screen at a time).
+func DefaultSettingsFor(platform string) Settings {
+	s := DefaultSettings()
+	if platform == PlatformKobo {
+		s.Comic = Prefs{Fit: FitWidth, Scroll: ScrollContinuous}
+	}
+	return s
 }
 
 func validPrefs(p Prefs, def Prefs) Prefs {
 	if p.Fit != FitBoth && p.Fit != FitWidth && p.Fit != FitHeight {
 		p.Fit = def.Fit
+	}
+	if p.Scroll != ScrollPage && p.Scroll != ScrollContinuous {
+		p.Scroll = def.Scroll
+		if p.Scroll == "" {
+			p.Scroll = ScrollPage
+		}
 	}
 	return p
 }
@@ -143,6 +179,9 @@ func (s *Settings) Sanitize() {
 	case AlphaAuto, AlphaOn, AlphaOff:
 	default:
 		s.Alpha = AlphaAuto
+	}
+	if s.Buttons != ButtonsSwapped {
+		s.Buttons = ButtonsNormal
 	}
 	if s.ColourRefresh < ColourEvery5 || s.ColourRefresh > ColourNever {
 		s.ColourRefresh = ColourEvery5
@@ -202,14 +241,14 @@ func (s *Settings) SeedFromConfig(c Config) {
 // LoadSettings reads the settings file. A missing or unreadable file yields
 // the defaults seeded from the config; fromFile reports which happened.
 func LoadSettings(path string, c Config) (s Settings, fromFile bool) {
-	s = DefaultSettings()
+	s = DefaultSettingsFor(c.Platform)
 	b, err := os.ReadFile(path)
 	if err != nil {
 		s.SeedFromConfig(c)
 		return s, false
 	}
 	var f Settings
-	f = DefaultSettings()
+	f = DefaultSettingsFor(c.Platform)
 	if err := json.Unmarshal(b, &f); err != nil {
 		s.SeedFromConfig(c)
 		return s, false

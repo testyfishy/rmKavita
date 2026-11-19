@@ -124,7 +124,7 @@ func (a *App) drawSignin() {
 		var w int
 		if text == "" && i == 0 && s.focus != 0 {
 			ph := a.st(44, false, inkRule)
-			a.Fonts.Draw(c, x, a.textBaseline(r.Min.Y, r.Dy(), ph.Size), "http://host:port", ph)
+			a.Fonts.Draw(c, x, a.textBaseline(r.Min.Y, r.Dy(), ph.Size), "host:port", ph)
 		} else {
 			// keep the end of long text visible
 			for a.Fonts.Width(text, ts) > right-x-a.u(12) && len(text) > 1 {
@@ -282,13 +282,23 @@ func (a *App) loginText(e *opds.Error) (short, detail string) {
 	case opds.KindLocked:
 		return "Account locked for a while", e.Msg
 	case opds.KindDoor:
+		if a.proxied {
+			return "Tailscale is not running", "Open NickelMenu > Tailscale and turn it on"
+		}
 		return "Cannot reach the server", "Nothing is listening at that address"
 	case opds.KindNetwork:
+		if a.proxied {
+			return "The server is not answering", "Check Wi-Fi, and that the server shows online on the Tailscale page"
+		}
 		return "The server is not answering", e.Msg
 	case opds.KindNotFound:
 		return "Not a Kavita address", "Check the server address"
 	case opds.KindAuth:
 		return "Signed in, but the key was refused", ""
+	case opds.KindNeedsHTTPS:
+		return "That port expects https://", "Use Kavita's own port (usually 5000), or type https:// in front"
+	case opds.KindTLSName:
+		return "Secure connection refused for that name", "Use the server's full name (e.g. name.tailnet.ts.net), or Kavita's own port with http"
 	case opds.KindServer:
 		return e.Short(), e.Msg
 	}
@@ -307,6 +317,8 @@ func (a *App) signinSubmit() {
 		a.drawSignin()
 		a.present(a.full(), a.uiMode(), false, "signin-error")
 	}
+	// no http:// or https:// typed: http first, https if the server asks for it
+	autoScheme := !strings.Contains(string(s.server), "://")
 	srv, err := store.NormalizeServer(string(s.server))
 	if err != nil {
 		fail(err.Error(), 0)
@@ -339,13 +351,17 @@ func (a *App) signinSubmit() {
 	a.async(func() any {
 		ctx, cancel := context.WithTimeout(ctxBase, 25*time.Second)
 		defer cancel()
-		res, e := a.Cl.Login(ctx, base, user, pw)
+		res, used, e := a.Cl.LoginAuto(ctx, base, user, pw, autoScheme)
+		if used.Scheme != base.Scheme {
+			a.logf("sign-in: %s wants https, switched", used.Host)
+			base, srv = used, used.Scheme+"://"+used.Host
+		}
 		if e != nil {
-			return loginMsg{si: s, err: e}
+			return loginMsg{si: s, err: e, server: srv}
 		}
 		// Confirm the key works before it is saved.
 		if e := a.Cl.VerifyKey(ctx, base, res.Key); e != nil {
-			return loginMsg{si: s, err: e}
+			return loginMsg{si: s, err: e, verify: true, src: res.KeySource, server: srv}
 		}
 		return loginMsg{si: s, server: srv, user: res.Username, key: res.Key}
 	})
@@ -358,8 +374,21 @@ func (a *App) onLogin(m loginMsg) {
 	}
 	s.busy = false
 	if m.err != nil {
-		a.logf("sign-in failed: kind=%d status=%d", m.err.Kind, m.err.Status)
+		stage := "login"
+		if m.verify {
+			stage = "key-check"
+		}
+		// Msg is already redacted (no key, no password)
+		a.logf("sign-in failed: stage=%s kind=%d status=%d msg=%q key=%s", stage, m.err.Kind, m.err.Status, m.err.Msg, m.src)
+		if m.server != "" {
+			s.server = []rune(m.server) // shows the scheme that was used
+		}
 		s.short, s.detail = a.loginText(m.err)
+		if m.verify && (m.err.Status == 400 || m.err.Status == 403) && strings.Contains(strings.ToLower(m.err.Msg), "opds") {
+			// older Kavita answers 400, newer 403, with an "opds-disabled" message
+			s.short = "Signed in, but OPDS is off in Kavita"
+			s.detail = "An admin can turn on OPDS in Kavita's server settings, then sign in again"
+		}
 		s.focus = 2
 		a.drawSignin()
 		a.present(a.full(), a.uiMode(), false, "signin-error")

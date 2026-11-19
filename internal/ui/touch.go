@@ -311,6 +311,12 @@ func (a *App) onEvent(ev display.Event) {
 		a.typeText(ev.Text)
 		return
 	}
+	if ev.Kind == display.Button {
+		a.inAt = ev.At
+		a.clrT.Stop() // a deferred clearing refresh waits for the reader to pause
+		a.onButton(ev.Text)
+		return
+	}
 	a.onTouch(ev)
 }
 
@@ -477,7 +483,12 @@ func (a *App) topBand() int { return a.u(260) }
 
 // revealMinY is the first y of the reveal-swipe band: AppLoad reacts to a press
 // above y = 100, so the band starts at 120 device pixels at the least.
-func (a *App) revealMinY() int { return max(120, a.u(120)) }
+func (a *App) revealMinY() int {
+	if a.kobo() {
+		return a.u(20)
+	}
+	return max(120, a.u(120))
+}
 
 // gesture classifies a finished touch into tap / swipe.
 func (a *App) gesture(x0, y0, x, y int) {
@@ -488,12 +499,17 @@ func (a *App) gesture(x0, y0, x, y int) {
 		a.onSwipe(0, 1, true)
 		return
 	}
-	if a.screen() == scrReader && y0 < a.revealMinY() && dy > 0 && ady >= a.u(100) && ady*10 > adx*14 {
+	if !a.kobo() && a.screen() == scrReader && y0 < a.revealMinY() && dy > 0 && ady >= a.u(100) && ady*10 > adx*14 {
 		return // AppLoad's top-bar drag: not ours
 	}
 	slop := a.u(80)
 	if dist2(x0, y0, x, y) <= slop*slop {
 		a.onTap(x0, y0)
+		return
+	}
+	if r := a.rd; a.screen() == scrReader && a.continuousOn(r) && !r.overlay && !a.pop.open &&
+		ady >= a.u(160) && ady*10 > adx*14 && a.errPage(r) < 0 {
+		a.contScroll(-dy) // the strip follows the finger: up = forward, by the swipe's length
 		return
 	}
 	switch {

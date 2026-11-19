@@ -142,6 +142,9 @@ func (a *App) invalidatePages() {
 
 // offPM is the scroll offset of the current page in thousandths of its extent.
 func (a *App) offPM(r *reader) int {
+	if a.continuousOn(r) {
+		return a.contPM(r)
+	}
 	f := r.ready(r.page)
 	if f == nil || r.off <= 0 {
 		return 0
@@ -369,6 +372,26 @@ func (a *App) settingsRows() []srow {
 				p.Fit = f.v
 				a.settingsChanged(a.affects(sv.kind))
 			}})
+	}
+	rows = append(rows, srow{typ: srSection, label: "Scroll"})
+	for _, m := range []struct{ name, label, v string }{
+		{"scroll-page", "Page by page", store.ScrollPage}, {"scroll-continuous", "Continuous", store.ScrollContinuous}} {
+		m := m
+		rows = append(rows, srow{typ: srRadio, name: m.name, label: m.label, sel: p.Scroll == m.v,
+			fn: func() {
+				if p.Scroll == m.v {
+					return
+				}
+				p.Scroll = m.v
+				a.settingsChanged(a.affects(sv.kind))
+			}})
+	}
+	if a.hasButtons {
+		rows = append(rows, srow{typ: srSection, label: "Side buttons"},
+			srow{typ: srRadio, name: "buttons-normal", label: "Normal", sel: s.Buttons != store.ButtonsSwapped,
+				fn: func() { s.Buttons = store.ButtonsNormal; a.settingsChanged(false) }},
+			srow{typ: srRadio, name: "buttons-swapped", label: "Swapped", sel: s.Buttons == store.ButtonsSwapped,
+				fn: func() { s.Buttons = store.ButtonsSwapped; a.settingsChanged(false) }})
 	}
 	rows = append(rows, srow{typ: srSection, label: "Footer"},
 		srow{typ: srRadio, name: "footer-on", label: "On", sel: s.Footer, fn: func() { s.Footer = true; a.settingsChanged(a.rd != nil) }},

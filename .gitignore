@@ -1,5 +1,6 @@
 # build output
 /package/rmkavita
+/package/kobo/rmkavita
 /dist/
 # local installer settings
 /install/install.conf
@@ -13,3 +14,4 @@ Thumbs.db
 *.test
 *.out
 *.prof
+/package/kobo/tailscale/tspanel
