@@ -131,15 +131,27 @@ done
 # KoboRoot.tgz: the system-partition part (copied to .kobo/ by the user, Nickel unpacks it into / and reboots)
 RSTAGE="dist/.rstage"
 rm -rf "$RSTAGE"
-mkdir -p "$RSTAGE/etc/udev/rules.d" "$RSTAGE/usr/local/tailscale"
+# (state/ is an empty directory entry: tailscaled keeps its sign-in there, and unpacking over an existing one leaves
+# its contents alone, so re-installing does not sign the Kobo out)
+mkdir -p "$RSTAGE/etc/udev/rules.d" "$RSTAGE/usr/local/tailscale/state"
 cp package/kobo/tailscale/98-tailscale.rules "$RSTAGE/etc/udev/rules.d/"
 cp package/kobo/tailscale/ts.sh package/kobo/tailscale/boot.sh "$RSTAGE/usr/local/tailscale/"
 chmod 0644 "$RSTAGE/etc/udev/rules.d/98-tailscale.rules"
 chmod 0755 "$RSTAGE/usr/local/tailscale/ts.sh" "$RSTAGE/usr/local/tailscale/boot.sh"
+chmod 0700 "$RSTAGE/usr/local/tailscale/state"
 (
 	cd "$RSTAGE"
 	if tar --version 2>/dev/null | grep -q 'GNU tar'; then
-		tar --owner=0 --group=0 --numeric-owner --mtime=@"$EPOCH" --sort=name -cf ../.rtar etc usr
+		# every entry named, with its mode set here (file modes on the build host, e.g. Windows, are not reliable)
+		R="--owner=0 --group=0 --numeric-owner --mtime=@$EPOCH --no-recursion"
+		# shellcheck disable=SC2086
+		tar $R --mode=0755 -cf ../.rtar etc etc/udev etc/udev/rules.d usr usr/local usr/local/tailscale
+		# shellcheck disable=SC2086
+		tar $R --mode=0700 -rf ../.rtar usr/local/tailscale/state
+		# shellcheck disable=SC2086
+		tar $R --mode=0644 -rf ../.rtar etc/udev/rules.d/98-tailscale.rules
+		# shellcheck disable=SC2086
+		tar $R --mode=0755 -rf ../.rtar usr/local/tailscale/boot.sh usr/local/tailscale/ts.sh
 	else
 		tar -cf ../.rtar etc usr
 	fi

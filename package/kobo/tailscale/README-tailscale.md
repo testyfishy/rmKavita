@@ -21,7 +21,7 @@ it runs. Its state (the sign-in) is on the system partition, `/usr/local/tailsca
 | File | What it is |
 | --- | --- |
 | `tspanel` | the Tailscale page (NickelMenu > Tailscale) and the relay; built from `cmd/tspanel` |
-| `KoboRoot.tgz` | the system-partition part: `ts.sh` and `boot.sh` in `/usr/local/tailscale/`, the udev rule in `/etc/udev/rules.d/` |
+| `KoboRoot.tgz` | the system-partition part: `ts.sh` and `boot.sh` in `/usr/local/tailscale/`, the udev rule in `/etc/udev/rules.d/`, and an empty `/usr/local/tailscale/state/` (only the directory: installing it again leaves an existing sign-in alone) |
 | `ts.sh`, `boot.sh`, `98-tailscale.rules` | the same files, to read (the copies that run are the ones from `KoboRoot.tgz`) |
 | `nm-tailscale`, `nm-calibre` | NickelMenu entries, not active until you copy them into `.adds/nm/` |
 | `relay.conf.sample` | the relay's doors (see below) |
