@@ -1,8 +1,13 @@
 # rmKavita
 
-**Read the comics and manga on your [Kavita](https://www.kavitareader.com) server on a reMarkable Paper Pro.**
-rmKavita streams pages straight from the server onto the e-ink panel, one page at a time. Nothing is downloaded and
-nothing is kept on the tablet except a small configuration file and your reading positions.
+**Read the comics and manga on your [Kavita](https://www.kavitareader.com) server on a reMarkable Paper Pro or a
+Kobo e-reader.** rmKavita streams pages straight from the server onto the e-ink panel, one page at a time. Nothing is
+downloaded and nothing is kept on the device except a small configuration file and your reading positions.
+
+**New in 0.4.0: Kobo.** Tested on a Kobo Libra 2 (firmware 4.38.23852): started from NickelMenu, the side buttons
+move one screen at a time through a continuous, fit-to-width strip. An optional Tailscale kit brings the server in
+from any network, and lets Nickel's own Kobo sync (Calibre-Web) reach the tailnet too. See
+**[rmKavita on a Kobo](package/kobo/README-kobo.md)** and **[Tailscale on a Kobo](package/kobo/tailscale/README-tailscale.md)**.
 
 > **Unofficial.** rmKavita is not affiliated with, endorsed by or sponsored by Kavita, reMarkable, KOReader or any
 > other project it works with or learned from. See [CREDITS.md](CREDITS.md).
@@ -29,10 +34,12 @@ nothing is kept on the tablet except a small configuration file and your reading
 - **Private.** No accounts, no cloud, no telemetry. The password is typed on the tablet and never stored.
 
 Not goals: downloads or offline reading, EPUB and other text books (entries without page images are not listed),
-editing your library, a scrolling-strip mode. See the [roadmap](ROADMAP.md).
+editing your library. See the [roadmap](ROADMAP.md).
 
 ## Requirements
 
+- A **Kobo** with an i.MX panel (tested: Libra 2) and [NickelMenu](https://pgaskin.net/NickelMenu/): see
+  [rmKavita on a Kobo](package/kobo/README-kobo.md) for install and use. Or:
 - A **reMarkable Paper Pro** with [xovi and AppLoad](https://github.com/asivery/rm-appload) **0.5.0 or newer**.
   Tested on a Paper Pro (software 3.28) with AppLoad 0.6.0. The Paper Pro Move uses the same code with its own panel
   size and density, but has not been tested.
@@ -46,8 +53,8 @@ or [build it yourself](CONTRIBUTING.md#build-and-test), then:
 
 ```sh
 sha256sum -c SHA256SUMS --ignore-missing   # optional: check the download
-tar xzf rmkavita-0.3.1-linux-arm64.tar.gz
-cd rmkavita-0.3.1/install
+tar xzf rmkavita-0.4.0-linux-arm64.tar.gz
+cd rmkavita-0.4.0/install
 cp install.conf.sample install.conf        # set TABLET_HOST, SSH_KEY and the Kavita address
 ./install.sh --dry-run                     # read-only checks and the plan; changes nothing
 ./install.sh
@@ -59,10 +66,20 @@ the [install guide](install/README-install.md).
 
 ## Using it
 
+On a Kobo, install and use are in [rmKavita on a Kobo](package/kobo/README-kobo.md).
+
 Sign in with your Kavita user name and password, open a series, and tap the right or left column of the screen to
 turn pages; tap the middle to open the bars. Hold a corner for about a second to clear the screen (top right) or quit
 (bottom left). Everything else is in the **[user guide](docs/USER-GUIDE.md)**: browsing, the A-Z bar, every setting,
 and troubleshooting.
+
+If signing in fails and the message does not make the reason clear, `kavcheck` runs the same sign-in from a computer
+and prints each step (address, login, OPDS key, the libraries the account can see), with the password read without
+echo and the key removed from the output:
+
+```sh
+go run ./cmd/kavcheck -server http://myserver:5000 -user NAME   # add -proxy socks5://127.0.0.1:1055 to test a proxy
+```
 
 ## Documentation
 
@@ -70,6 +87,7 @@ and troubleshooting.
 |---|---|
 | [User guide](docs/USER-GUIDE.md) | signing in, reading, hot corners, settings, files, troubleshooting |
 | [Install guide](install/README-install.md) | the installer, the optional Tailscale door, uninstall |
+| [rmKavita on a Kobo](package/kobo/README-kobo.md) · [Tailscale on a Kobo](package/kobo/tailscale/README-tailscale.md) | Kobo install and use; Tailscale, the status page and the relay for Kobo sync |
 | [Design](docs/DESIGN.md) | how it works: display path, page pipeline, long lists, input, memory |
 | [Configuration reference](package/rmkavita.conf.sample) | every key of the config file |
 | [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md) | what changed, what is planned and why |
