@@ -1,0 +1,12 @@
+# Tailscale relay doors: "listen-on-the-Kobo  server-on-the-tailnet", one per line.
+# Programs on the Kobo (the browser, Kobo sync) use http://127.0.0.1:PORT and
+# the relay carries it over Tailscale. Changes apply when Tailscale restarts
+# (Tailscale page: Turn off, Turn on). Copy to .adds/tailscale/relay.conf.
+
+# for example Calibre-Web (Kobo sync) published with Tailscale Serve; in
+# .kobo/Kobo/Kobo eReader.conf, [OneStoreServices]:
+#   api_endpoint=http://127.0.0.1:8083/kobo/TOKEN
+#127.0.0.1:8083  https://myserver.tailnet-name.ts.net:8446
+
+# and calibre's own content server (NickelMenu > Calibre opens /mobile)
+#127.0.0.1:8084  https://myserver.tailnet-name.ts.net:8445

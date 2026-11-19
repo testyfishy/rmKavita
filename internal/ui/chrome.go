@@ -20,7 +20,14 @@ type hdr struct {
 	close      bool // sign-in: a plain Exit cross instead of the account icon
 }
 
-func (a *App) headerTop() int { return a.u(100) } // the top strip stays free for AppLoad's own edge swipe
+// headerTop is where the bar starts: the top strip stays free for AppLoad's
+// own edge swipe on the reMarkable; a Kobo has nothing up there.
+func (a *App) headerTop() int {
+	if a.kobo() {
+		return a.u(16)
+	}
+	return a.u(100)
+}
 func (a *App) headerH() int   { return a.u(130) }
 func (a *App) margin() int    { return a.u(40) }
 

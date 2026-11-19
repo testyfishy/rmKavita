@@ -32,6 +32,7 @@ type reader struct {
 	off         int  // pixels scrolled along the page's scroll axis (reading-direction coordinates)
 	startPM     int  // pending per-mille offset for `page` (-1 none)
 	toEnd       bool // pending: show the end of `page` when it arrives (came back from the next)
+	backRem     int  // continuous: pending step back into `page`, in pixels from its end (0 none)
 	slots       map[int]*slot
 	peakHeld    int  // most decoded pages held at once in this chapter (for the RAM bound test)
 	nextLoading bool // the series feed is being fetched to find the next chapter
@@ -129,7 +130,9 @@ func (r *reader) savePos(a *App) {
 		return
 	}
 	y := 0
-	if f := r.ready(r.page); f != nil && r.off > 0 {
+	if a.continuousOn(r) {
+		y = a.contPM(r)
+	} else if f := r.ready(r.page); f != nil && r.off > 0 {
 		ext, _, _ := a.scrollGeom(f)
 		if ext > 0 {
 			y = r.off * 1000 / ext
@@ -265,6 +268,12 @@ func (a *App) window(r *reader) []int {
 		behind = min(behind, 1)
 	}
 	var order []int
+	if a.continuousOn(r) {
+		// every page the window shows comes first: short pages (spreads fitted to
+		// the width) put two or three on screen at once
+		ps, _ := a.contPages(r)
+		order = append(order, ps...)
+	}
 	order = append(order, r.page)
 	if ahead >= 1 {
 		order = append(order, r.page+1)
@@ -533,6 +542,10 @@ func (a *App) onPage(m pageMsg) {
 // settle applies a pending offset (restored position, or "end of the page")
 // once the page it belongs to is decoded.
 func (a *App) settle(r *reader) {
+	if a.continuousOn(r) {
+		a.contSettle(r)
+		return
+	}
 	f := r.ready(r.page)
 	if f == nil || (r.startPM < 0 && !r.toEnd) {
 		return
@@ -554,6 +567,10 @@ func (a *App) viewportReady(r *reader) bool {
 	if a.errPage(r) >= 0 {
 		return false
 	}
+	if a.continuousOn(r) {
+		_, missing := a.contPages(r)
+		return missing < 0
+	}
 	return r.ready(r.page) != nil
 }
 
@@ -564,6 +581,10 @@ func (a *App) viewportReady(r *reader) bool {
 func (a *App) readerStep(dir int) {
 	r := a.rd
 	if r == nil {
+		return
+	}
+	if a.continuousOn(r) {
+		a.contStep(dir)
 		return
 	}
 	if f := r.ready(r.page); f != nil {
@@ -638,10 +659,10 @@ func (a *App) moveToPage(np int, toEnd bool) {
 	if np >= r.count {
 		np = r.count - 1
 	}
-	if np == r.page {
+	if np == r.page && !(a.continuousOn(r) && r.off != 0) {
 		return
 	}
-	r.page, r.off, r.startPM, r.toEnd = np, 0, -1, toEnd
+	r.page, r.off, r.startPM, r.toEnd, r.backRem = np, 0, -1, toEnd, 0
 	a.afterMove()
 }
 

@@ -1,0 +1,45 @@
+# rmKavita configuration on a Kobo  (.adds/rmkavita/rmkavita.conf)
+#
+# You do not need this file to start: sign in on the device and the app writes
+# `server`, `username` and `api_key` here itself (the password is never
+# stored). Copy this file to rmkavita.conf only to set something below before
+# the first launch. Lines starting with # are ignored.
+#
+# Note: the Kobo user partition has no file permissions, so the stored OPDS key
+# can be read by anyone who plugs the Kobo into a computer. Sign out in the
+# app (account menu -> Logout) to remove it.
+
+# The Kavita server the Sign-in screen starts with (a Tailscale name or
+# 100.x address works once Tailscale is running on the Kobo).
+#server = http://htpc:5000
+
+# Send every request through a proxy: a userspace Tailscale on the Kobo listens
+# for SOCKS5 on 127.0.0.1:1055. Leave unset when Tailscale runs with a TUN
+# device (or when the server is on your Wi-Fi).
+#proxy = socks5://127.0.0.1:1055
+
+# --- Kobo display and input ---
+
+# Framebuffer rotation: auto (keep Nickel's portrait) or 0-3 to force one.
+#fb_rotate = auto
+
+# Touch calibration, found on the first launch (two taps on crosses). Delete
+# this line to calibrate again.
+#touch_map = -
+
+# --- pages in memory (a Libra 2 has 512 MB) ---
+#read_ahead = 3
+#keep_behind = 1
+#cache_mb = 48
+#mem_guard_mb = 90
+#mem_floor_mb = 45
+
+# Hot corners (hold a corner): none quit clear home settings controls first
+# last next_chapter prev_chapter colour direction fit footer
+#hot_tl = none
+#hot_tr = clear
+#hot_bl = quit
+#hot_br = none
+
+# Every other key of the reMarkable sample (package/rmkavita.conf.sample)
+# works here too.

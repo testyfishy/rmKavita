@@ -13,7 +13,8 @@ are used here only to say what the program works with.
 The name "rmKavita" and the icon are the author's and are not licensed for use as
 the name of another product.
 
-The compiled program contains the following third-party software. No Kavita
+The compiled programs (rmkavita for the reMarkable and the Kobo, and the Kobo
+Tailscale helper tspanel) contain the following third-party software. No Kavita
 source code is included or linked (Kavita is GPL-3.0; rmKavita only talks to a
 Kavita server over its documented OPDS and image HTTP interfaces). Who and what
 the project learned from, with no code taken, is in CREDITS.md.
@@ -27,7 +28,17 @@ the project learned from, with no code taken, is in CREDITS.md.
 4. The Go fonts "Go Regular" and "Go Bold" (embedded via golang.org/x/image/font/gofont)
                                               BSD-style      (c) 2016 Bigelow & Holmes Inc.
 5. golang.org/x/sys    (CPU feature detection; linked into builds for x86-64 only,
-                        not into the linux/arm64 program that runs on the tablet)
+                        not into the programs that run on the tablet or the Kobo;
+                        console echo control in the kavcheck tool on Windows)
+                                              BSD-3-Clause   (c) The Go Authors
+6. golang.org/x/crypto/x509roots/fallback  (a built-in set of trusted TLS root
+                        certificates, used when the device has none; in rmkavita
+                        and tspanel)
+                                              BSD-3-Clause   (c) The Go Authors
+   The root certificates themselves are the Mozilla CA root store (from the
+   Mozilla NSS project / CCADB)
+                                              MPL-2.0        Mozilla Foundation
+7. rsc.io/qr           (the QR code on the tspanel sign-in page)
                                               BSD-3-Clause   (c) The Go Authors
 
 Test data (not part of the program): internal/opds/testdata holds OPDS answers
@@ -127,7 +138,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-=== golang.org/x/sys (x86-64 builds only) ===
+=== golang.org/x/sys (x86-64 builds, and kavcheck on Windows) ===
 
 Copyright 2009 The Go Authors.
 
@@ -156,6 +167,76 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=== golang.org/x/crypto/x509roots/fallback ===
+
+Copyright 2009 The Go Authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google LLC nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=== rsc.io/qr ===
+
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google LLC nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=== The Mozilla CA root store (in golang.org/x/crypto/x509roots/fallback) ===
+
+The trusted root certificates embedded by golang.org/x/crypto/x509roots/fallback
+are taken, unmodified, from the Mozilla CA Certificate Program's root store
+(the NSS certdata, via the CCADB). That data is made available under the Mozilla
+Public License, version 2.0. The full licence text is at
+https://www.mozilla.org/en-US/MPL/2.0/ and the source form of the data is at
+https://hg.mozilla.org/projects/nss/ (lib/ckfw/builtins/certdata.txt) and in
+golang.org/x/crypto (x509roots/fallback/bundle).
 
 === The Go fonts (Go Regular, Go Bold) ===
 

@@ -1,6 +1,7 @@
-// Command rmkavita is a fullscreen AppLoad app for the reMarkable Paper Pro: a
-// lightweight client that streams manga and comics from a Kavita server over
-// OPDS-PSE, one page at a time, and stores nothing but small state files.
+// Command rmkavita is a fullscreen app for the reMarkable Paper Pro (started by
+// AppLoad) and for Kobo e-readers (started from NickelMenu): a lightweight
+// client that streams manga and comics from a Kavita server over OPDS-PSE, one
+// page at a time, and stores nothing but small state files.
 package main
 
 import (
@@ -13,6 +14,11 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
+
+	// root certificates for https:// servers on devices that ship none (a Kobo);
+	// used only when the system has no roots of its own
+	_ "golang.org/x/crypto/x509roots/fallback"
 
 	"rmkavita/internal/display"
 	"rmkavita/internal/gfx"
@@ -21,7 +27,7 @@ import (
 	"rmkavita/internal/ui"
 )
 
-var version = "0.3.1"
+var version = "0.4.0"
 
 func env(k, def string) string {
 	if v := os.Getenv(k); v != "" {
@@ -31,12 +37,21 @@ func env(k, def string) string {
 }
 
 func main() {
+	// The defaults follow the device: AppLoad on the reMarkable, the user
+	// partition on a Kobo.
+	isKobo := onKobo()
+	defConf, defSet, defState, defLog, defBackend := "/home/root/.config/rmkavita.conf", "/home/root/.config/rmkavita-settings.json",
+		"/home/root/.config/rmkavita-state.json", "/tmp/rmkavita.log", "qtfb"
+	if isKobo {
+		defConf, defSet, defState, defLog, defBackend = koboDir+"/rmkavita.conf", koboDir+"/settings.json",
+			koboDir+"/state.json", koboDir+"/rmkavita.log", "kobo"
+	}
 	var (
-		confPath  = flag.String("conf", env("RMKAVITA_CONF", "/home/root/.config/rmkavita.conf"), "config file (mode 600): server, user name, API key")
-		setPath   = flag.String("settings", env("RMKAVITA_SETTINGS", "/home/root/.config/rmkavita-settings.json"), "settings file (not secret)")
-		statePath = flag.String("state", env("RMKAVITA_STATE", "/home/root/.config/rmkavita-state.json"), "reading positions file")
-		logPath   = flag.String("log", env("RMKAVITA_LOG", "/tmp/rmkavita.log"), "log file (tmpfs); empty = stderr only")
-		backend   = flag.String("backend", "qtfb", "qtfb | png")
+		confPath  = flag.String("conf", env("RMKAVITA_CONF", defConf), "config file (mode 600): server, user name, API key")
+		setPath   = flag.String("settings", env("RMKAVITA_SETTINGS", defSet), "settings file (not secret)")
+		statePath = flag.String("state", env("RMKAVITA_STATE", defState), "reading positions file")
+		logPath   = flag.String("log", env("RMKAVITA_LOG", defLog), "log file; empty = stderr only")
+		backend   = flag.String("backend", defBackend, "qtfb | kobo | png")
 		pngDir    = flag.String("png-dir", "frames", "png backend: output directory")
 		script    = flag.String("script", "", "png backend: touch script file")
 		size      = flag.String("size", "1620x2160", "png backend: canvas size WxH")
@@ -50,6 +65,7 @@ func main() {
 		logStderr = flag.Bool("stderr", false, "also log to stderr (default: only when stderr is a terminal)")
 		discard   = flag.Bool("png-discard", false, "png backend: do not draw or write frames (memory measurements)")
 		dbg       = flag.Bool("debug", env("RMKAVITA_DEBUG", "") != "", "debug-level log lines")
+		platFlag  = flag.String("platform", "", "png backend: lay out as on this platform (remarkable | kobo)")
 	)
 	flag.Parse()
 	if *showVer {
@@ -64,14 +80,22 @@ func main() {
 	// big thing; the soft limit only makes the collector work harder when the heap
 	// nears it, it kills nothing. The out-of-memory protection is the guard in the
 	// app (mem_guard_mb, mem_floor_mb), which looks at what the system has left.
+	platform := store.PlatformRemarkable
+	if *backend == "kobo" || (*backend == "png" && *platFlag == store.PlatformKobo) {
+		platform = store.PlatformKobo
+	}
 	debug.SetGCPercent(40)
-	debug.SetMemoryLimit(280 << 20)
+	if platform == store.PlatformKobo {
+		debug.SetMemoryLimit(150 << 20) // a Libra 2 has 512 MB in all
+	} else {
+		debug.SetMemoryLimit(280 << 20)
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)
 	defer stop()
 	watchParent(stop)
 
-	cfg, warn, cerr := store.LoadConfig(*confPath)
+	cfg, warn, cerr := store.LoadConfigFor(*confPath, platform)
 	logger := store.NewLogger(*logPath, nil)
 	// Under AppLoad stderr is a pipe the launcher owns: log to the file only.
 	logger.Stderr = *logStderr || store.StderrIsTerminal()
@@ -86,12 +110,24 @@ func main() {
 		os.Exit(2)
 	}
 	// Open the display first, so even a bad config is explained on screen.
-	disp, devDPI, err := openDisplay(*backend, *pngDir, *script, *size, *dpi, *discard, cfg.FBFormat)
-	if err != nil {
-		logger.Logf("display: %v", err)
+	var (
+		disp   display.Display
+		devDPI int
+		err2   error
+	)
+	if *backend == "kobo" {
+		disp, devDPI, err2 = openKobo(&cfg, *confPath, fonts, logger)
+	} else {
+		disp, devDPI, err2 = openDisplay(*backend, *pngDir, *script, *size, *dpi, *discard, cfg.FBFormat)
+	}
+	if err2 != nil {
+		logger.Logf("display: %v", err2)
 		os.Exit(1)
 	}
 	defer disp.Close()
+	if kp, ok := disp.(koboPanel); ok {
+		defer kp.WaitIdle(2 * time.Second) // the last frame is on the panel before Nickel comes back
+	}
 
 	if cerr != nil {
 		logger.Logf("config: %v", cerr)
@@ -123,10 +159,15 @@ func main() {
 		cfg.ReadAhead, cfg.KeepBehind, cfg.CacheMB, cfg.MemGuardMB, cfg.MemFloorMB, cfg.ZoneMiddle, cfg.HotTL, cfg.HotTR, cfg.HotBL, cfg.HotBR)
 
 	pos := store.OpenPositions(*statePath)
-	app := ui.New(ui.Options{Cfg: cfg, Set: settings, ConfPath: *confPath, SettingsPath: *setPath, DeviceDPI: devDPI, Debug: *dbg, Version: version},
+	app := ui.New(ui.Options{Cfg: cfg, Set: settings, ConfPath: *confPath, SettingsPath: *setPath, DeviceDPI: devDPI, Debug: *dbg, Version: version,
+		HasButtons: platform == store.PlatformKobo},
 		disp, pos, fonts, logger)
 	reason := app.Run(ctx)
 	logger.Logf("exit: %s", reason)
+	if platform == store.PlatformKobo && *backend == "kobo" {
+		// stays on the panel until Nickel draws its own screen
+		splash(disp, fonts, devDPI, "Closing", false)
+	}
 }
 
 func runMigrate(conf, state, oldConf, oldState string) int {

@@ -1,8 +1,55 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
-Documentation and credits only; the program is the same as 0.3.1 apart from comments.
+Kobo e-readers.
+
+- **Runs on a Kobo** (tested on a Libra 2, firmware 4.38.23852): a new display backend draws on the Linux framebuffer and
+  refreshes the i.MX EPDC panel with `MXCFB_SEND_UPDATE` (DU / GC16 / AUTO waveforms, the full refresh as GC16 with
+  the flash), and reads the touch screen (multi-touch protocol B, with the single-touch protocol as a fallback) and
+  the keys from evdev, grabbed while the app runs. 8, 16 and 32 bpp framebuffers; a landscape buffer is turned to
+  portrait. The same binary detects the device; `-backend kobo` forces it.
+- **Started from NickelMenu.** `launch.sh` stops Nickel and its helpers, runs the app and starts Nickel again (and
+  reboots if Nickel does not come back). The release has a zip to extract onto the Kobo's drive: `.adds/rmkavita/`
+  and the NickelMenu entry `.adds/nm/rmkavita`. Config, settings, positions and the log live in
+  `.adds/rmkavita/`.
+- **Touch calibration** on the first launch: two crosses, two taps; the transform is kept as `touch_map`.
+- **Side buttons** (page-turn keys 193/194, PageUp/PageDown): one press is one screen in the reader, one page of
+  rows in lists and Settings. Settings -> Side buttons: Normal / Swapped. The **power key** leaves the app.
+- **Continuous reading** (Settings -> Scroll: Page by page / Continuous, per document kind): the pages of a chapter
+  are one vertical strip. A side key or a tap on a side column moves it by exactly one screen (with the usual 8 %
+  overlap) in one redraw, never an animation; a vertical swipe moves it by the swipe's length; past the end of the
+  last page the next chapter opens. The position inside a page is remembered. On a Kobo, comics open **fit to
+  width, continuous** by default; the reMarkable keeps page by page.
+- `proxy = socks5://127.0.0.1:1055` (or http/https) sends every request through a proxy: how a userspace Tailscale on
+  the Kobo reaches a server on the tailnet.
+- Kobo defaults sized for 512 MB of RAM: `cache_mb = 48`, `mem_guard_mb = 90`, `mem_floor_mb = 45`, `keep_behind = 1`,
+  a 150 MB soft heap limit. No AppLoad strip at the top of the screen on a Kobo.
+- New config keys: `proxy`, `fb_rotate`, `touch_map`.
+- **Sign-in:** an address typed without `http://` or `https://` is tried with http first and switched to https when
+  the server asks for it (a Tailscale Serve name, for example). A port that expects https, a certificate refused for
+  the name typed, an unreachable server (with a hint to check the Tailscale page when a proxy is set), a wrong
+  address and a refused key each get their own message. Root certificates are built in, for devices that ship none.
+- **Tailscale on the Kobo** (optional, in the Kobo zip under `.adds/tailscale/`; Tailscale's own binaries are not
+  included: use the official static arm build). `ts.sh` runs `tailscaled` in userspace mode with SOCKS5 on
+  `127.0.0.1:1055`, started at boot and when Wi-Fi comes up, from a copy in `/tmp` so USB storage keeps working; it
+  sets a wrong clock before TLS. Installed with a `KoboRoot.tgz`. Tested with Tailscale 1.104.7.
+- **tspanel**, the Tailscale page (NickelMenu > Tailscale, in the Kobo's browser): on/off, sign in with a link and a
+  QR code, sign out, Tailscale SSH on/off, the devices on the tailnet, the end of the log with Save to the Kobo's
+  drive. Loopback only, a per-run token for every action, exits when idle.
+- **tspanel relay**: plain-http doors on `127.0.0.1` to https servers on the tailnet, for Nickel, which cannot use a
+  proxy; absolute links in answers are rewritten to the door. Verified with Calibre-Web's Kobo sync
+  (`api_endpoint=http://127.0.0.1:8083/kobo/<TOKEN>`) on a library of about 2,900 books, which arrive as cloud
+  entries and download on tap. A second door for calibre's content server in the browser (NickelMenu > Calibre) is in
+  the sample. Sync tokens are written as `<token>` in the log.
+- **kavcheck**, a command-line tool for a computer: runs rmKavita's sign-in against a server and prints each step
+  (login, OPDS key, visible libraries), the password read without echo and the key removed.
+- The release has the Kobo binary and `rmkavita-VERSION-kobo.zip` next to the reMarkable build; all binaries,
+  `tspanel` included, are built twice and checked to be the same.
+- NOTICE lists the new third-party code: `golang.org/x/crypto/x509roots/fallback` (with the Mozilla root store, MPL-2.0)
+  and `rsc.io/qr`.
+
+### Documentation (after 0.3.1)
 
 - The README is shorter; settings, hot corners, files and troubleshooting moved into
   [docs/USER-GUIDE.md](docs/USER-GUIDE.md).

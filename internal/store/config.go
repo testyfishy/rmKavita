@@ -61,7 +61,43 @@ type Config struct {
 	Gamma        float64 // output curve; 1 = off
 	HoldMs       int     // corner hold duration
 	SyncProgress bool    // re-request the page you are on after a pause so Kavita's progress matches it
-	Unknown      []string
+	// Proxy routes every request to Kavita through this proxy (http://, https://
+	// or socks5:// URL; "" = direct). On a Kobo it is how a userspace Tailscale
+	// (its SOCKS5 port) reaches a server on the tailnet.
+	Proxy string
+	// FBRotate overrides the framebuffer rotation on a Kobo (-1 = automatic,
+	// otherwise 0..3 in the kernel's FB_ROTATE_* numbering).
+	FBRotate int
+	// TouchMap is the Kobo touch-to-screen transform found by the first-run
+	// calibration: any of "s" (swap x and y), "x" (mirror x), "y" (mirror y),
+	// or "-" for none. "" = not calibrated yet.
+	TouchMap string
+	// Platform is the device family the app runs on ("remarkable", "kobo"); it
+	// is set by the program, not read from the file.
+	Platform string
+	Unknown  []string
+}
+
+// Platforms.
+const (
+	PlatformRemarkable = "remarkable"
+	PlatformKobo       = "kobo"
+)
+
+// DefaultConfigFor returns the defaults of a platform. A Kobo Libra 2 has
+// 512 MB of RAM (a third of the reMarkable's budget is all it can spare), no
+// AppLoad strip at the top, and page-turn keys.
+func DefaultConfigFor(platform string) Config {
+	c := DefaultConfig()
+	c.Platform = platform
+	if platform == PlatformKobo {
+		c.CacheMB = 48
+		c.MemGuardMB = 90
+		c.MemFloorMB = 45
+		c.ReadAhead = 3
+		c.KeepBehind = 1
+	}
+	return c
 }
 
 // DefaultConfig returns the defaults.
@@ -96,6 +132,8 @@ func DefaultConfig() Config {
 		Gamma:        1,
 		HoldMs:       900,
 		SyncProgress: true,
+		FBRotate:     -1,
+		Platform:     PlatformRemarkable,
 	}
 }
 
@@ -195,8 +233,11 @@ func legacyRoot(v string) (origin string, hadKey bool, ok bool) {
 
 // ParseConfig reads key = value lines. Bad values fall back to the default and
 // are named (key only, never the value) in Unknown.
-func ParseConfig(data string) Config {
-	c := DefaultConfig()
+func ParseConfig(data string) Config { return ParseConfigFor(data, PlatformRemarkable) }
+
+// ParseConfigFor is ParseConfig on top of a platform's defaults.
+func ParseConfigFor(data, platform string) Config {
+	c := DefaultConfigFor(platform)
 	sc := bufio.NewScanner(strings.NewReader(data))
 	sc.Buffer(make([]byte, 0, 4096), 64*1024)
 	haveServer := false
@@ -441,6 +482,33 @@ func ParseConfig(data string) Config {
 			} else {
 				bad()
 			}
+		case "proxy":
+			if v == "" {
+				c.Proxy = ""
+				break
+			}
+			u, err := url.Parse(v)
+			if err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "socks5" && u.Scheme != "socks5h") {
+				bad()
+				break
+			}
+			c.Proxy = v
+		case "fb_rotate":
+			switch lv := strings.ToLower(v); lv {
+			case "auto", "-1":
+				c.FBRotate = -1
+			case "0", "1", "2", "3":
+				c.FBRotate = int(lv[0] - '0')
+			default:
+				bad()
+			}
+		case "touch_map":
+			lv := strings.ToLower(v)
+			if lv == "" || strings.Trim(lv, "sxy-") != "" {
+				bad()
+				break
+			}
+			c.TouchMap = lv
 		default:
 			c.Unknown = append(c.Unknown, "unknown key "+k)
 		}
@@ -451,18 +519,23 @@ func ParseConfig(data string) Config {
 // LoadConfig reads and parses the file at path. A missing file is not an error
 // (the app then starts at the Sign-in screen); a world- or group-readable file
 // that holds a key is reported but still used.
-func LoadConfig(path string) (Config, string, error) {
+func LoadConfig(path string) (Config, string, error) { return LoadConfigFor(path, PlatformRemarkable) }
+
+// LoadConfigFor is LoadConfig on top of a platform's defaults. On a Kobo the
+// file lives on the FAT user partition, which has no permission bits: the mode
+// warning does not apply there.
+func LoadConfigFor(path, platform string) (Config, string, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return DefaultConfig(), "", nil
+			return DefaultConfigFor(platform), "", nil
 		}
-		return DefaultConfig(), "", fmt.Errorf("cannot read config: %w", err)
+		return DefaultConfigFor(platform), "", fmt.Errorf("cannot read config: %w", err)
 	}
-	c := ParseConfig(string(b))
+	c := ParseConfigFor(string(b), platform)
 	c.Exists = true
 	warn := ""
-	if c.APIKey != "" {
+	if c.APIKey != "" && platform != PlatformKobo {
 		if st, err := os.Stat(path); err == nil && st.Mode().Perm()&0o077 != 0 {
 			warn = fmt.Sprintf("config file mode is %o, expected 600", st.Mode().Perm())
 		}

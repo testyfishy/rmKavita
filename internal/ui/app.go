@@ -78,6 +78,8 @@ type (
 		user   string
 		key    string
 		err    *opds.Error
+		verify bool   // the failure came from checking the key, after the login worked
+		src    string // where the key came from (names only)
 	}
 	authMsg struct {
 		sess int
@@ -105,6 +107,8 @@ type Options struct {
 	Debug        bool           // debug-level log lines
 	Version      string         // shown on the About screen
 	OnShow       func(Snapshot) // called after every update sent to the display (tests, diagnostics)
+	// HasButtons: the device has page-turn keys (Settings shows their order).
+	HasButtons bool
 }
 
 // App is the UI state machine.
@@ -119,6 +123,8 @@ type App struct {
 
 	confPath, setPath string
 	deviceDPI, dpi    int
+	hasButtons        bool
+	proxied           bool // requests go through a proxy (Tailscale on a Kobo)
 	debug             bool
 	version           string
 	onShow            func(Snapshot)
@@ -217,14 +223,28 @@ func New(o Options, d display.Display, pos *store.Positions, fonts *gfx.Fonts, l
 		t0:         time.Now(),
 		armed:      display.ModeKeep,
 		memAvail:   memAvailableMB,
+		hasButtons: o.HasButtons,
 	}
 	a.Set.Sanitize()
 	a.applyDPI()
+	if a.kobo() {
+		a.Cl.UA = "rmKavita/0.4 (Kobo)"
+	}
+	if o.Cfg.Proxy != "" {
+		if pu, err := url.Parse(o.Cfg.Proxy); err == nil {
+			a.Cl.SetProxy(pu)
+			a.proxied = true
+		}
+	}
 	if log != nil {
 		log.Redact = a.Cl.Redact
 	}
 	return a
 }
+
+// kobo reports whether the app runs on a Kobo (no AppLoad strip at the top,
+// page-turn keys, the continuous strip by default).
+func (a *App) kobo() bool { return a.Cfg.Platform == store.PlatformKobo }
 
 // applyDPI derives the layout scale from the setting (0 = automatic).
 func (a *App) applyDPI() {

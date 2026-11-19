@@ -8,3 +8,7 @@ mkdir -p package
 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -buildvcs=false \
   -ldflags "-s -w -X main.version=$VERSION" -o package/rmkavita ./cmd/rmkavita
 echo "built package/rmkavita ($VERSION)"
+# the Kobo binary (linux/arm, ARMv7): package/kobo/rmkavita
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -trimpath -buildvcs=false \
+  -ldflags "-s -w -X main.version=$VERSION" -o package/kobo/rmkavita ./cmd/rmkavita
+echo "built package/kobo/rmkavita ($VERSION)"

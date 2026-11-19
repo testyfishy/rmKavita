@@ -29,6 +29,8 @@ const (
 	KindData                     // answered, but the body is not what was expected
 	KindBadLogin                 // sign-in: the user name or password was refused
 	KindLocked                   // sign-in: Kavita locked the account after repeated failures
+	KindNeedsHTTPS               // sign-in: plain http was sent to an https port
+	KindTLSName                  // sign-in: the https server has no certificate for that name
 )
 
 // Error is a request failure with every secret removed.
@@ -62,6 +64,10 @@ func (e *Error) Short() string {
 		return "Wrong username or password"
 	case KindLocked:
 		return "Account locked for a while"
+	case KindNeedsHTTPS:
+		return "That port expects https://"
+	case KindTLSName:
+		return "Secure connection refused for that name"
 	}
 	return "Error"
 }
@@ -120,6 +126,20 @@ type Client struct {
 	MaxFeed int64
 	MaxImg  int64
 	login   *http.Client
+	tr      *http.Transport
+}
+
+// SetProxy sends every request through proxy (http, https or socks5; nil =
+// direct, the default). It must be called before the first request.
+func (c *Client) SetProxy(proxy *url.URL) {
+	if c.tr == nil {
+		return
+	}
+	if proxy == nil {
+		c.tr.Proxy = nil
+		return
+	}
+	c.tr.Proxy = http.ProxyURL(proxy)
 }
 
 func newTransport() *http.Transport {
@@ -140,6 +160,7 @@ func newTransport() *http.Transport {
 func NewUnsigned() *Client {
 	tr := newTransport()
 	return &Client{
+		tr:      tr,
 		HTTP:    &http.Client{Transport: tr},
 		UA:      "rmKavita/0.3 (reMarkable)",
 		MaxFeed: 8 << 20,
@@ -392,6 +413,9 @@ func (c *Client) GetImage(ctx context.Context, rawURL string) ([]byte, error) {
 type LoginResult struct {
 	Key      string
 	Username string
+	// KeySource says where Key came from ("authKeys[<name>]" or "apiKey") and
+	// lists the names of the user's keys: for diagnostics, never the values.
+	KeySource string
 }
 
 type loginBody struct {
@@ -436,10 +460,24 @@ func (c *Client) Login(ctx context.Context, server *url.URL, username, password 
 	req.Header.Set("User-Agent", c.UA)
 	resp, err := c.login.Do(req)
 	if err != nil {
-		return LoginResult{}, c.classify(err)
+		e := c.classify(err)
+		// a server (Kestrel, Tailscale Serve) that has a certificate only for its
+		// full name ends the handshake with "internal error" for any other name
+		if server.Scheme == "https" && strings.Contains(err.Error(), "tls: internal error") {
+			e.Kind = KindTLSName
+		}
+		return LoginResult{}, e
 	}
 	defer resp.Body.Close()
 	switch {
+	case resp.StatusCode == 400 && server.Scheme == "http":
+		txt, _ := io.ReadAll(io.LimitReader(resp.Body, 400))
+		if strings.Contains(strings.ToLower(string(txt)), "https") {
+			// "Client sent an HTTP request to an HTTPS server." (Go, Kestrel, nginx
+			// say much the same); the login never reached Kavita
+			return LoginResult{}, &Error{Kind: KindNeedsHTTPS, Status: 400, Msg: oneLine(c.Redact(string(txt)))}
+		}
+		return LoginResult{}, &Error{Kind: KindServer, Status: 400, Msg: "HTTP 400 " + oneLine(c.Redact(string(txt)))}
 	case resp.StatusCode == 200:
 	case resp.StatusCode == 401:
 		txt, _ := io.ReadAll(io.LimitReader(resp.Body, 400))
@@ -465,23 +503,41 @@ func (c *Client) Login(ctx context.Context, server *url.URL, username, password 
 	if err := json.Unmarshal(raw, &ans); err != nil {
 		return LoginResult{}, &Error{Kind: KindData, Msg: "Kavita's answer was not understood"}
 	}
-	key := ""
+	key, src := "", ""
+	var names []string
 	for _, k := range ans.AuthKeys {
-		if k.Name == "opds" && k.Key != "" {
-			key = k.Key
-			break
+		names = append(names, k.Name)
+		if key == "" && k.Name == "opds" && k.Key != "" {
+			key, src = k.Key, "authKeys["+k.Name+"]"
 		}
 	}
-	if key == "" {
-		key = ans.APIKey
+	if key == "" && ans.APIKey != "" {
+		key, src = ans.APIKey, "apiKey"
 	}
+	src = fmt.Sprintf("%s (keys: %s)", src, strings.Join(names, ", "))
 	if key == "" {
 		return LoginResult{}, &Error{Kind: KindData, Msg: "Kavita did not return a key"}
 	}
 	if ans.Username == "" {
 		ans.Username = username
 	}
-	return LoginResult{Key: key, Username: ans.Username}, nil
+	return LoginResult{Key: key, Username: ans.Username, KeySource: src}, nil
+}
+
+// LoginAuto is Login for an address typed without a scheme (auto true): it
+// tries base as given (http) and, when the port answers that it wants https,
+// asks again over https. That first request was refused before it reached
+// Kavita, so it does not count as a failed sign-in. It returns the origin that
+// was used.
+func (c *Client) LoginAuto(ctx context.Context, base *url.URL, username, password string, auto bool) (LoginResult, *url.URL, *Error) {
+	res, e := c.Login(ctx, base, username, password)
+	if e != nil && e.Kind == KindNeedsHTTPS && auto {
+		hs := *base
+		hs.Scheme = "https"
+		res, e = c.Login(ctx, &hs, username, password)
+		return res, &hs, e
+	}
+	return res, base, e
 }
 
 // VerifyKey confirms that key works against server by fetching the root feed
